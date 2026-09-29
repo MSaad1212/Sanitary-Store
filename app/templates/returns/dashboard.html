@@ -69,8 +69,8 @@
             <h3 class="card-title">Customer Inward Returns</h3>
             <span class="badge badge-teal">{{ customer_returns|length }}</span>
         </div>
-        <div class="table-container" style="margin-top: 0; box-shadow: none;">
-            <table class="data-table">
+        <div class="table-container has-card-view" style="margin-top: 0; box-shadow: none;">
+            <table class="data-table table-card-view">
                 <thead>
                     <tr>
                         <th>Return #</th>
@@ -83,11 +83,13 @@
                 <tbody>
                     {% for r in customer_returns %}
                     <tr>
-                        <td style="font-weight: 700; color: var(--primary);">{{ r.return_no }}</td>
-                        <td>{{ r.customer.name }}</td>
-                        <td style="font-weight: 700; color: var(--secondary);">Rs. {{ '%.2f'|format(r.total_amount|float) }}</td>
-                        <td><span class="badge badge-navy">{{ r.refund_method or 'Cash' }}</span></td>
-                        <td>
+                        <td class="card-primary-cell" data-label="Return #">
+                            <span style="font-weight: 700; color: var(--primary);">{{ r.return_no }}</span>
+                        </td>
+                        <td data-label="Customer">{{ r.customer.name }}</td>
+                        <td data-label="Amount" style="font-weight: 700; color: var(--secondary);">Rs. {{ '%.2f'|format(r.total_amount|float) }}</td>
+                        <td data-label="Refund"><span class="badge badge-navy">{{ r.refund_method or 'Cash' }}</span></td>
+                        <td class="card-actions-cell" data-label="Actions">
                             <a href="/print/customer-return/{{ r.id }}" class="btn btn-secondary btn-sm" target="_blank" title="Print">
                                 <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
                             </a>
@@ -95,7 +97,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" style="text-align: center; padding: 32px 0; color: var(--text-muted);">
+                        <td colspan="5" class="card-empty-cell" style="text-align: center; padding: 32px 0; color: var(--text-muted);">
                             No customer returns on {{ selected }}.
                         </td>
                     </tr>
@@ -111,8 +113,8 @@
             <h3 class="card-title">Supplier Outward Returns</h3>
             <span class="badge badge-navy">{{ supplier_returns|length }}</span>
         </div>
-        <div class="table-container" style="margin-top: 0; box-shadow: none;">
-            <table class="data-table">
+        <div class="table-container has-card-view" style="margin-top: 0; box-shadow: none;">
+            <table class="data-table table-card-view">
                 <thead>
                     <tr>
                         <th>Return #</th>
@@ -125,11 +127,13 @@
                 <tbody>
                     {% for r in supplier_returns %}
                     <tr>
-                        <td style="font-weight: 700; color: var(--primary);">{{ r.return_no }}</td>
-                        <td>{{ r.supplier.name }}</td>
-                        <td style="font-weight: 700; color: var(--primary);">Rs. {{ '%.2f'|format(r.total_amount|float) }}</td>
-                        <td><span class="badge badge-navy">{{ r.refund_method or 'Cash' }}</span></td>
-                        <td>
+                        <td class="card-primary-cell" data-label="Return #">
+                            <span style="font-weight: 700; color: var(--primary);">{{ r.return_no }}</span>
+                        </td>
+                        <td data-label="Supplier">{{ r.supplier.name }}</td>
+                        <td data-label="Amount" style="font-weight: 700; color: var(--primary);">Rs. {{ '%.2f'|format(r.total_amount|float) }}</td>
+                        <td data-label="Refund"><span class="badge badge-navy">{{ r.refund_method or 'Cash' }}</span></td>
+                        <td class="card-actions-cell" data-label="Actions">
                             <a href="/print/supplier-return/{{ r.id }}" class="btn btn-secondary btn-sm" target="_blank" title="Print">
                                 <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
                             </a>
@@ -137,7 +141,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" style="text-align: center; padding: 32px 0; color: var(--text-muted);">
+                        <td colspan="5" class="card-empty-cell" style="text-align: center; padding: 32px 0; color: var(--text-muted);">
                             No supplier returns on {{ selected }}.
                         </td>
                     </tr>

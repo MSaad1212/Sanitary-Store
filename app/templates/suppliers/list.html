@@ -38,8 +38,8 @@
     </div>
 </div>
 
-<div class="table-container">
-    <table class="data-table">
+<div class="table-container has-card-view">
+    <table class="data-table table-card-view">
         <thead>
             <tr>
                 <th>Supplier / Code</th>
@@ -53,7 +53,7 @@
         <tbody>
             {% for s in suppliers %}
             <tr>
-                <td>
+                <td class="card-primary-cell" data-label="Supplier">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <div style="width: 36px; height: 36px; border-radius: var(--radius-md); background: #E0E7FF; color: #4338CA; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0;">
                             {{ s.name[0]|upper }}
@@ -67,15 +67,15 @@
                     </div>
                 </td>
 
-                <td style="color: var(--text-secondary); font-size: 0.88rem;">
+                <td data-label="Contact Person" style="color: var(--text-secondary); font-size: 0.88rem;">
                     {{ s.contact_person or '—' }}
                 </td>
 
-                <td style="color: var(--text-secondary); font-size: 0.88rem;">
+                <td data-label="Phone" style="color: var(--text-secondary); font-size: 0.88rem;">
                     {{ s.phone or '—' }}
                 </td>
 
-                <td>
+                <td data-label="Balance Payable">
                     {% if s.current_balance > 0 %}
                     <span style="font-family: var(--font-heading); font-weight: 700; color: var(--error);">
                         Payable: Rs. {{ '%.2f'|format(s.current_balance|float) }}
@@ -89,7 +89,7 @@
                     {% endif %}
                 </td>
 
-                <td>
+                <td data-label="Status">
                     {% if s.status == 'Active' %}
                     <span class="badge badge-success">Active</span>
                     {% else %}
@@ -97,7 +97,7 @@
                     {% endif %}
                 </td>
 
-                <td style="text-align: right;">
+                <td class="card-actions-cell" data-label="Actions" style="text-align: right;">
                     <div style="display: inline-flex; gap: 6px;">
                         <a href="/suppliers/{{ s.id }}" class="btn btn-secondary btn-sm" title="View Ledger">
                             <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
@@ -115,7 +115,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="6" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
+                <td colspan="6" class="card-empty-cell" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
                     <i data-lucide="truck" style="width: 36px; height: 36px; margin-bottom: 8px; opacity: 0.4;"></i>
                     <p style="font-size: 0.95rem;">No suppliers found.</p>
                 </td>

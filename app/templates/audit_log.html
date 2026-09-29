@@ -14,8 +14,8 @@
     <span class="badge badge-navy">{{ logs|length }} Audit Records</span>
 </div>
 
-<div class="table-container" style="margin-top: 0;">
-    <table class="data-table">
+<div class="table-container has-card-view" style="margin-top: 0;">
+    <table class="data-table table-card-view">
         <thead>
             <tr>
                 <th>Timestamp</th>
@@ -27,10 +27,15 @@
         <tbody>
             {% for log in logs %}
             <tr>
-                <td style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 500;">
-                    {{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') if log.timestamp else '—' }}
+                <td class="card-primary-cell" data-label="Timestamp">
+                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                        <span style="font-weight: 600; color: var(--primary);">
+                            {{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') if log.timestamp else '—' }}
+                        </span>
+                        <span class="badge badge-teal">{{ log.action }}</span>
+                    </div>
                 </td>
-                <td>
+                <td data-label="Staff Account">
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <div class="user-avatar" style="width: 26px; height: 26px; font-size: 0.75rem; background: var(--secondary-light); color: var(--secondary);">
                             {{ (log.user.username[0]|upper) if log.user else 'S' }}
@@ -38,16 +43,16 @@
                         <span style="font-weight: 600; color: var(--primary);">{{ log.user.username if log.user else 'System' }}</span>
                     </div>
                 </td>
-                <td>
+                <td data-label="Operation / Action">
                     <span class="badge badge-teal">{{ log.action }}</span>
                 </td>
-                <td style="color: var(--text-secondary); font-size: 0.88rem;">
+                <td data-label="Details & Reference" style="color: var(--text-secondary); font-size: 0.88rem; text-align: left; word-break: break-word;">
                     {{ log.details or '—' }}
                 </td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="4" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
+                <td colspan="4" class="card-empty-cell" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
                     <i data-lucide="history" style="width: 36px; height: 36px; margin-bottom: 8px; opacity: 0.4;"></i>
                     <p style="font-size: 0.95rem;">No audit records logged yet.</p>
                 </td>

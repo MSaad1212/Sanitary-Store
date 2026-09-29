@@ -14,8 +14,8 @@
             <span class="badge badge-navy">{{ users|length }} User(s)</span>
         </div>
 
-        <div class="table-container" style="margin-top: 0;">
-            <table class="data-table">
+        <div class="table-container has-card-view" style="margin-top: 0;">
+            <table class="data-table table-card-view">
                 <thead>
                     <tr>
                         <th>Staff Member</th>
@@ -28,7 +28,7 @@
                 <tbody>
                     {% for user in users %}
                     <tr>
-                        <td>
+                        <td class="card-primary-cell" data-label="Staff Member">
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <div class="user-avatar" style="width: 34px; height: 34px; font-size: 0.82rem; background: var(--secondary-light); color: var(--secondary); border: 1px solid var(--secondary);">
                                     {{ user.username[0]|upper }}
@@ -42,11 +42,11 @@
                             </div>
                         </td>
 
-                        <td>
+                        <td data-label="Access Role">
                             <span class="badge badge-teal">{{ user.role }}</span>
                         </td>
 
-                        <td>
+                        <td data-label="Status">
                             {% if user.status == 'Active' %}
                             <span class="badge badge-success">Active</span>
                             {% else %}
@@ -54,11 +54,11 @@
                             {% endif %}
                         </td>
 
-                        <td style="color: var(--text-secondary); font-size: 0.85rem;">
+                        <td data-label="Created Date" style="color: var(--text-secondary); font-size: 0.85rem;">
                             {{ user.created_at.strftime('%Y-%m-%d') if user.created_at else '—' }}
                         </td>
 
-                        <td style="text-align: right;">
+                        <td class="card-actions-cell" data-label="Security Actions" style="text-align: right;">
                             <div style="display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end;">
                                 {% if user.id != current_user.id %}
                                 <form action="/users/{{ user.id }}/toggle-status" method="POST" style="display: inline;">

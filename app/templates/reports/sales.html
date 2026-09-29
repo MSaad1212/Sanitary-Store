@@ -31,7 +31,11 @@
     </div>
 </div>
 
-<div class="table-container" style="margin-top: 0;">
+<div class="table-scroll-container" style="margin-top: 0;">
+    <div class="table-scroll-indicator">
+        <span class="scroll-hint"><i data-lucide="arrow-left-right" style="width: 14px; height: 14px;"></i> Scroll horizontally to view full sales report</span>
+        <span class="scroll-arrow">&rarr;</span>
+    </div>
     <table class="data-table">
         <thead>
             <tr>
@@ -46,18 +50,18 @@
         <tbody>
             {% for s in sales %}
             <tr>
-                <td style="font-weight: 700;">
+                <td style="font-weight: 700; white-space: nowrap;">
                     <a href="/customers/sales/{{ s.id }}" class="link">{{ s.invoice_no }}</a>
                 </td>
-                <td style="color: var(--text-secondary); font-size: 0.85rem;">{{ s.date }}</td>
+                <td style="color: var(--text-secondary); font-size: 0.85rem; white-space: nowrap;">{{ s.date }}</td>
                 <td style="font-weight: 600; color: var(--primary);">{{ s.customer.name }}</td>
-                <td style="font-weight: 700; font-family: var(--font-heading); color: var(--primary);">
+                <td style="font-weight: 700; font-family: var(--font-heading); color: var(--primary); white-space: nowrap;">
                     Rs. {{ '%.2f'|format(s.total_amount|float) }}
                 </td>
-                <td style="color: var(--success); font-family: var(--font-heading); font-weight: 600;">
+                <td style="color: var(--success); font-family: var(--font-heading); font-weight: 600; white-space: nowrap;">
                     Rs. {{ '%.2f'|format(s.amount_received|float) }}
                 </td>
-                <td style="text-align: right; font-weight: 700; font-family: var(--font-heading); color: {% if s.balance > 0 %}var(--error){% else %}var(--success){% endif %};">
+                <td style="text-align: right; font-weight: 700; font-family: var(--font-heading); white-space: nowrap; color: {% if s.balance > 0 %}var(--error){% else %}var(--success){% endif %};">
                     Rs. {{ '%.2f'|format(s.balance|float) }}
                 </td>
             </tr>

@@ -31,8 +31,8 @@
     </div>
 </div>
 
-<div class="table-container">
-    <table class="data-table">
+<div class="table-container has-card-view">
+    <table class="data-table table-card-view">
         <thead>
             <tr>
                 <th>Bill / Invoice #</th>
@@ -47,27 +47,29 @@
         <tbody>
             {% for p in purchases %}
             <tr>
-                <td style="font-weight: 700;">
-                    <a href="/suppliers/purchases/{{ p.id }}" class="link">{{ p.invoice_no }}</a>
+                <td class="card-primary-cell" data-label="Bill #">
+                    <span style="font-weight: 700;">
+                        <a href="/suppliers/purchases/{{ p.id }}" class="link">{{ p.invoice_no }}</a>
+                    </span>
                 </td>
-                <td style="color: var(--text-secondary); font-size: 0.85rem;">{{ p.date }}</td>
-                <td style="font-weight: 600; color: var(--primary);">
+                <td data-label="Date" style="color: var(--text-secondary); font-size: 0.85rem;">{{ p.date }}</td>
+                <td data-label="Supplier" style="font-weight: 600; color: var(--primary);">
                     {{ p.supplier.name }}
                 </td>
-                <td style="font-weight: 700; font-family: var(--font-heading); color: var(--primary);">
+                <td data-label="Total Billed" style="font-weight: 700; font-family: var(--font-heading); color: var(--primary);">
                     Rs. {{ '%.2f'|format(p.total_amount|float) }}
                 </td>
-                <td style="font-weight: 600; font-family: var(--font-heading); color: var(--success);">
+                <td data-label="Amount Paid" style="font-weight: 600; font-family: var(--font-heading); color: var(--success);">
                     Rs. {{ '%.2f'|format(p.amount_paid|float) }}
                 </td>
-                <td style="font-weight: 700; font-family: var(--font-heading);">
+                <td data-label="Balance Due" style="font-weight: 700; font-family: var(--font-heading);">
                     {% if p.balance > 0 %}
                     <span style="color: var(--error);">Rs. {{ '%.2f'|format(p.balance|float) }}</span>
                     {% else %}
                     <span style="color: var(--success); font-size: 0.85rem;">Paid in Full</span>
                     {% endif %}
                 </td>
-                <td style="text-align: right;">
+                <td class="card-actions-cell" data-label="Actions" style="text-align: right;">
                     <div style="display: inline-flex; gap: 6px;">
                         <a href="/suppliers/purchases/{{ p.id }}" class="btn btn-secondary btn-sm" title="View Purchase">
                             <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
@@ -80,7 +82,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="7" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
+                <td colspan="7" class="card-empty-cell" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
                     <i data-lucide="shopping-bag" style="width: 36px; height: 36px; margin-bottom: 8px; opacity: 0.4;"></i>
                     <p style="font-size: 0.95rem;">No purchase bills recorded.</p>
                 </td>

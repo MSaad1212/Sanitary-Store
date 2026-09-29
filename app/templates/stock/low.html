@@ -18,8 +18,8 @@
     </div>
 </div>
 
-<div class="table-container" style="margin-top: 0;">
-    <table class="data-table">
+<div class="table-container has-card-view" style="margin-top: 0;">
+    <table class="data-table table-card-view">
         <thead>
             <tr>
                 <th>Code & Brand</th>
@@ -34,32 +34,32 @@
         <tbody>
             {% for item in items %}
             <tr>
-                <td>
+                <td class="card-primary-cell" data-label="Code & Brand">
                     <span style="font-weight: 700; color: var(--primary);">
                         <a href="/stock/{{ item.id }}" class="link">{{ item.item_code }}</a>
                     </span>
                     <div style="font-size: 0.75rem; color: var(--text-muted);">{{ item.brand }}</div>
                 </td>
-                <td style="font-weight: 600; color: var(--primary);">
+                <td data-label="Product Name" style="font-weight: 600; color: var(--primary);">
                     {{ item.name or item.brand }}
                 </td>
-                <td>
+                <td data-label="Category">
                     <span class="badge badge-teal">{{ item.category }}</span>
                 </td>
-                <td>
+                <td data-label="Current Stock">
                     {% if item.current_stock <= 0 %}
                     <span class="badge badge-danger">Out of Stock (0)</span>
                     {% else %}
                     <span class="badge badge-warning">{{ item.current_stock }} {{ item.unit }}</span>
                     {% endif %}
                 </td>
-                <td style="color: var(--text-secondary); font-weight: 600;">
+                <td data-label="Reorder Threshold" style="color: var(--text-secondary); font-weight: 600;">
                     {{ item.reorder_level }} {{ item.unit }}
                 </td>
-                <td style="color: var(--error); font-weight: 700;">
+                <td data-label="Deficit" style="color: var(--error); font-weight: 700;">
                     - {{ item.reorder_level - item.current_stock if item.reorder_level > item.current_stock else 0 }} {{ item.unit }}
                 </td>
-                <td style="text-align: right;">
+                <td class="card-actions-cell" data-label="Action" style="text-align: right;">
                     <div style="display: inline-flex; gap: 6px;">
                         <a href="/suppliers/purchases/new" class="btn btn-teal btn-sm" style="padding: 4px 10px; font-size: 0.78rem;">
                             Purchase
@@ -72,7 +72,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="7" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
+                <td colspan="7" class="card-empty-cell" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
                     <i data-lucide="check-circle-2" style="width: 36px; height: 36px; color: var(--success); margin-bottom: 8px;"></i>
                     <p style="font-size: 1rem; font-weight: 600; color: var(--primary);">All inventory levels are optimal</p>
                     <p style="font-size: 0.85rem;">No items currently fall below their minimum safety thresholds.</p>

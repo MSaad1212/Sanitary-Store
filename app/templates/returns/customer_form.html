@@ -61,8 +61,12 @@
             <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0;">Items will be added back into warehouse active stock</p>
         </div>
 
-        <div class="table-container" style="margin-top: 0;">
-            <table class="data-table">
+        <div class="table-scroll-container" style="margin-top: 0;">
+            <div class="table-scroll-indicator">
+                <span class="scroll-hint"><i data-lucide="arrow-left-right" style="width: 14px; height: 14px;"></i> Scroll horizontally to edit return items</span>
+                <span class="scroll-arrow">&rarr;</span>
+            </div>
+            <table class="data-table" style="min-width: 560px;">
                 <thead>
                     <tr>
                         <th style="width: 40%;">Product</th>

@@ -24,8 +24,8 @@
             <span class="badge badge-danger">{{ customers|length }} Debtor(s)</span>
         </div>
 
-        <div class="table-container" style="margin-top: 0; box-shadow: none;">
-            <table class="data-table">
+        <div class="table-container has-card-view" style="margin-top: 0; box-shadow: none;">
+            <table class="data-table table-card-view">
                 <thead>
                     <tr>
                         <th>Customer Name</th>
@@ -36,16 +36,16 @@
                 <tbody>
                     {% for c in customers %}
                     <tr>
-                        <td>
+                        <td class="card-primary-cell" data-label="Customer Name">
                             <div style="font-weight: 700; color: var(--primary);">
                                 <a href="/customers/{{ c.id }}" class="link">{{ c.name }}</a>
                             </div>
                             <span style="font-size: 0.75rem; color: var(--text-muted);">{{ c.customer_code }} · {{ c.phone or 'No phone' }}</span>
                         </td>
-                        <td style="text-align: right; font-weight: 700; font-family: var(--font-heading); color: var(--error);">
+                        <td data-label="Amount Due" style="text-align: right; font-weight: 700; font-family: var(--font-heading); color: var(--error);">
                             Rs. {{ '%.2f'|format(c.current_balance|float) }}
                         </td>
-                        <td style="text-align: right;">
+                        <td class="card-actions-cell" data-label="Action" style="text-align: right;">
                             <a href="/customers/payments/new" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 0.76rem;">
                                 Receive
                             </a>
@@ -53,7 +53,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="3" style="text-align: center; padding: 32px 0; color: var(--text-muted);">
+                        <td colspan="3" class="card-empty-cell" style="text-align: center; padding: 32px 0; color: var(--text-muted);">
                             <i data-lucide="check-circle" style="width: 28px; height: 28px; color: var(--success); margin-bottom: 6px;"></i>
                             <br>No outstanding customer balances.
                         </td>
@@ -74,8 +74,8 @@
             <span class="badge badge-warning">{{ suppliers|length }} Vendor(s)</span>
         </div>
 
-        <div class="table-container" style="margin-top: 0; box-shadow: none;">
-            <table class="data-table">
+        <div class="table-container has-card-view" style="margin-top: 0; box-shadow: none;">
+            <table class="data-table table-card-view">
                 <thead>
                     <tr>
                         <th>Supplier / Vendor</th>
@@ -86,16 +86,16 @@
                 <tbody>
                     {% for s in suppliers %}
                     <tr>
-                        <td>
+                        <td class="card-primary-cell" data-label="Supplier / Vendor">
                             <div style="font-weight: 700; color: var(--primary);">
                                 <a href="/suppliers/{{ s.id }}" class="link">{{ s.name }}</a>
                             </div>
                             <span style="font-size: 0.75rem; color: var(--text-muted);">{{ s.supplier_code }} · {{ s.phone or 'No phone' }}</span>
                         </td>
-                        <td style="text-align: right; font-weight: 700; font-family: var(--font-heading); color: var(--error);">
+                        <td data-label="Balance Payable" style="text-align: right; font-weight: 700; font-family: var(--font-heading); color: var(--error);">
                             Rs. {{ '%.2f'|format(s.current_balance|float) }}
                         </td>
-                        <td style="text-align: right;">
+                        <td class="card-actions-cell" data-label="Action" style="text-align: right;">
                             <a href="/suppliers/payments/new" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 0.76rem;">
                                 Pay
                             </a>
@@ -103,7 +103,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="3" style="text-align: center; padding: 32px 0; color: var(--text-muted);">
+                        <td colspan="3" class="card-empty-cell" style="text-align: center; padding: 32px 0; color: var(--text-muted);">
                             <i data-lucide="check-circle" style="width: 28px; height: 28px; color: var(--success); margin-bottom: 6px;"></i>
                             <br>No outstanding supplier liabilities.
                         </td>

@@ -103,7 +103,11 @@
         <span class="badge badge-navy">{{ movements|length }} Total Transactions</span>
     </div>
 
-    <div class="table-container" style="margin-top: 0; box-shadow: none;">
+    <div class="table-scroll-container" style="margin-top: 0; box-shadow: none;">
+        <div class="table-scroll-indicator">
+            <span class="scroll-hint"><i data-lucide="arrow-left-right" style="width: 14px; height: 14px;"></i> Scroll horizontally to view stock movement log</span>
+            <span class="scroll-arrow">&rarr;</span>
+        </div>
         <table class="data-table">
             <thead>
                 <tr>
@@ -117,18 +121,18 @@
             <tbody>
                 {% for m in movements %}
                 <tr>
-                    <td style="font-size: 0.85rem; color: var(--text-secondary);">
+                    <td style="font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap;">
                         {{ m.created_at.strftime('%Y-%m-%d %H:%M') if m.created_at else '—' }}
                     </td>
-                    <td>
+                    <td style="white-space: nowrap;">
                         <span class="badge {% if m.movement_type == 'sale' %}badge-danger{% elif m.movement_type == 'purchase' %}badge-success{% elif m.movement_type == 'adjustment' %}badge-warning{% else %}badge-teal{% endif %}">
                             {{ m.movement_type|replace('_', ' ')|capitalize }}
                         </span>
                     </td>
-                    <td style="font-weight: 700; font-family: var(--font-heading); color: {% if m.quantity_change > 0 %}var(--success){% else %}var(--error){% endif %};">
+                    <td style="font-weight: 700; font-family: var(--font-heading); white-space: nowrap; color: {% if m.quantity_change > 0 %}var(--success){% else %}var(--error){% endif %};">
                         {{ '%+d'|format(m.quantity_change) }} {{ item.unit }}
                     </td>
-                    <td style="font-weight: 600; color: var(--primary);">
+                    <td style="font-weight: 600; color: var(--primary); white-space: nowrap;">
                         {{ m.quantity_after }} {{ item.unit }}
                     </td>
                     <td style="color: var(--text-secondary); font-size: 0.85rem;">

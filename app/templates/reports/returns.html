@@ -22,8 +22,8 @@
             <h3 class="card-title">Customer Inbound Returns</h3>
             <span class="badge badge-teal">{{ customer_returns|length }} Records</span>
         </div>
-        <div class="table-container" style="margin-top: 0; box-shadow: none;">
-            <table class="data-table">
+        <div class="table-container has-card-view" style="margin-top: 0; box-shadow: none;">
+            <table class="data-table table-card-view">
                 <thead>
                     <tr>
                         <th>Return #</th>
@@ -35,16 +35,18 @@
                 <tbody>
                     {% for r in customer_returns %}
                     <tr>
-                        <td style="font-weight: 700; color: var(--primary);">{{ r.return_no }}</td>
-                        <td style="color: var(--text-secondary); font-size: 0.85rem;">{{ r.date }}</td>
-                        <td style="font-weight: 600;">{{ r.customer.name }}</td>
-                        <td style="font-weight: 700; font-family: var(--font-heading); color: var(--secondary);">
+                        <td class="card-primary-cell" data-label="Return #">
+                            <span style="font-weight: 700; color: var(--primary);">{{ r.return_no }}</span>
+                        </td>
+                        <td data-label="Date" style="color: var(--text-secondary); font-size: 0.85rem;">{{ r.date }}</td>
+                        <td data-label="Customer" style="font-weight: 600;">{{ r.customer.name }}</td>
+                        <td data-label="Refund Value" style="font-weight: 700; font-family: var(--font-heading); color: var(--secondary);">
                             Rs. {{ '%.2f'|format(r.total_amount|float) }}
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4" style="text-align: center; padding: 32px 0; color: var(--text-muted);">
+                        <td colspan="4" class="card-empty-cell" style="text-align: center; padding: 32px 0; color: var(--text-muted);">
                             No customer returns recorded in this period.
                         </td>
                     </tr>
@@ -60,8 +62,8 @@
             <h3 class="card-title">Supplier Outbound Returns</h3>
             <span class="badge badge-navy">{{ supplier_returns|length }} Records</span>
         </div>
-        <div class="table-container" style="margin-top: 0; box-shadow: none;">
-            <table class="data-table">
+        <div class="table-container has-card-view" style="margin-top: 0; box-shadow: none;">
+            <table class="data-table table-card-view">
                 <thead>
                     <tr>
                         <th>Return #</th>
@@ -73,16 +75,18 @@
                 <tbody>
                     {% for r in supplier_returns %}
                     <tr>
-                        <td style="font-weight: 700; color: var(--primary);">{{ r.return_no }}</td>
-                        <td style="color: var(--text-secondary); font-size: 0.85rem;">{{ r.date }}</td>
-                        <td style="font-weight: 600;">{{ r.supplier.name }}</td>
-                        <td style="font-weight: 700; font-family: var(--font-heading); color: var(--primary);">
+                        <td class="card-primary-cell" data-label="Return #">
+                            <span style="font-weight: 700; color: var(--primary);">{{ r.return_no }}</span>
+                        </td>
+                        <td data-label="Date" style="color: var(--text-secondary); font-size: 0.85rem;">{{ r.date }}</td>
+                        <td data-label="Supplier" style="font-weight: 600;">{{ r.supplier.name }}</td>
+                        <td data-label="Debit Value" style="font-weight: 700; font-family: var(--font-heading); color: var(--primary);">
                             Rs. {{ '%.2f'|format(r.total_amount|float) }}
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4" style="text-align: center; padding: 32px 0; color: var(--text-muted);">
+                        <td colspan="4" class="card-empty-cell" style="text-align: center; padding: 32px 0; color: var(--text-muted);">
                             No supplier returns recorded in this period.
                         </td>
                     </tr>

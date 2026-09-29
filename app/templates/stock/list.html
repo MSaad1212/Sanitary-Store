@@ -47,8 +47,8 @@
     </div>
 </div>
 
-<div class="table-container">
-    <table class="data-table">
+<div class="table-container has-card-view">
+    <table class="data-table table-card-view">
         <thead>
             <tr>
                 <th>Product / Details</th>
@@ -64,7 +64,7 @@
         <tbody>
             {% for item in items %}
             <tr>
-                <td>
+                <td class="card-primary-cell" data-label="Product">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <div style="width: 38px; height: 38px; border-radius: var(--radius-md); background: var(--bg-subtle); display: flex; align-items: center; justify-content: center; color: var(--secondary); flex-shrink: 0; border: 1px solid var(--border-color);">
                             {% if 'Basin' in item.category or 'Sink' in item.category %}
@@ -96,22 +96,22 @@
                     </div>
                 </td>
 
-                <td>
+                <td data-label="Category">
                     <span class="badge badge-teal">{{ item.category }}</span>
                     {% if item.description %}
                     <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">{{ item.description }}</div>
                     {% endif %}
                 </td>
 
-                <td style="font-family: var(--font-heading); font-size: 0.92rem; color: var(--text-secondary);">
+                <td data-label="Purchase Cost" style="font-family: var(--font-heading); font-size: 0.92rem; color: var(--text-secondary);">
                     Rs. {{ '%.2f'|format(item.purchase_price|float) }}
                 </td>
 
-                <td style="font-family: var(--font-heading); font-size: 1rem; font-weight: 700; color: var(--primary);">
+                <td data-label="Sale Price" style="font-family: var(--font-heading); font-size: 1rem; font-weight: 700; color: var(--primary);">
                     Rs. {{ '%.2f'|format(item.sale_price|float) }}
                 </td>
 
-                <td>
+                <td data-label="Stock Availability">
                     {% if item.current_stock <= 0 %}
                     <span class="badge badge-danger">Out of Stock (0)</span>
                     {% elif item.current_stock <= item.reorder_level %}
@@ -121,11 +121,11 @@
                     {% endif %}
                 </td>
 
-                <td style="color: var(--text-muted); font-size: 0.85rem;">
+                <td data-label="Reorder Level" style="color: var(--text-muted); font-size: 0.85rem;">
                     {{ item.reorder_level }} {{ item.unit }}
                 </td>
 
-                <td>
+                <td data-label="Status">
                     {% if item.status == 'Active' %}
                     <span class="badge badge-success">Active</span>
                     {% else %}
@@ -133,7 +133,7 @@
                     {% endif %}
                 </td>
 
-                <td style="text-align: right;">
+                <td class="card-actions-cell" data-label="Actions" style="text-align: right;">
                     <div style="display: inline-flex; gap: 6px;">
                         <a href="/stock/{{ item.id }}" class="btn btn-secondary btn-sm" title="View History & Movements">
                             <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
@@ -151,7 +151,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="8" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
+                <td colspan="8" class="card-empty-cell" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
                     <i data-lucide="package" style="width: 36px; height: 36px; margin-bottom: 8px; opacity: 0.4;"></i>
                     <p style="font-size: 0.95rem;">No products match the selected criteria.</p>
                     <a href="/stock/new" class="btn btn-teal btn-sm" style="margin-top: 12px; width: auto; display: inline-flex;">

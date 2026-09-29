@@ -27,8 +27,8 @@
             </button>
         </form>
 
-        <div class="table-container" style="margin-top: 0; box-shadow: none;">
-            <table class="data-table">
+        <div class="table-container has-card-view" style="margin-top: 0; box-shadow: none;">
+            <table class="data-table table-card-view">
                 <thead>
                     <tr>
                         <th>Category Name</th>
@@ -38,10 +38,10 @@
                 <tbody>
                     {% for cat in categories %}
                     <tr>
-                        <td style="font-weight: 600; color: var(--primary);">
+                        <td class="card-primary-cell" data-label="Category Name" style="font-weight: 600; color: var(--primary);">
                             {{ cat.name }}
                         </td>
-                        <td style="text-align: right;">
+                        <td class="card-actions-cell" data-label="Action" style="text-align: right;">
                             <form method="post" action="/settings/categories/{{ cat.id }}/delete" onsubmit="return confirmDelete(event, this, 'this category');">
                                 <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--error); padding: 4px 8px;">
                                     <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
@@ -50,7 +50,7 @@
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="2" style="text-align: center; color: var(--text-muted); padding: 32px 0;">No categories registered.</td></tr>
+                    <tr><td colspan="2" class="card-empty-cell" style="text-align: center; color: var(--text-muted); padding: 32px 0;">No categories registered.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -74,8 +74,8 @@
             </button>
         </form>
 
-        <div class="table-container" style="margin-top: 0; box-shadow: none;">
-            <table class="data-table">
+        <div class="table-container has-card-view" style="margin-top: 0; box-shadow: none;">
+            <table class="data-table table-card-view">
                 <thead>
                     <tr>
                         <th>Material / Finish Description</th>
@@ -85,10 +85,10 @@
                 <tbody>
                     {% for typ in types %}
                     <tr>
-                        <td style="font-weight: 600; color: var(--primary);">
+                        <td class="card-primary-cell" data-label="Material / Finish Description" style="font-weight: 600; color: var(--primary);">
                             {{ typ.name }}
                         </td>
-                        <td style="text-align: right;">
+                        <td class="card-actions-cell" data-label="Action" style="text-align: right;">
                             <form method="post" action="/settings/types/{{ typ.id }}/delete" onsubmit="return confirmDelete(event, this, 'this material type');">
                                 <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--error); padding: 4px 8px;">
                                     <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
@@ -97,7 +97,7 @@
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="2" style="text-align: center; color: var(--text-muted); padding: 32px 0;">No material types registered.</td></tr>
+                    <tr><td colspan="2" class="card-empty-cell" style="text-align: center; color: var(--text-muted); padding: 32px 0;">No material types registered.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
