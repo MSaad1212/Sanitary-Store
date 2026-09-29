@@ -1,0 +1,117 @@
+{% extends "dashboard.html" %}
+{% block title %}Outstanding Balances Report — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}Outstanding Receivables & Payables Ledger{% endblock %}
+
+{% block content %}
+<div class="card" style="padding: 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+    <div>
+        <h3 style="font-size: 1.1rem; color: var(--primary); margin: 0; font-weight: 700;">Account Balance Reconciliation</h3>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 2px 0 0;">
+            Real-time balance comparison between customer debts owed to store and bills payable to manufacturers.
+        </p>
+    </div>
+    <a href="/reports" class="btn btn-secondary btn-sm">&larr; Reports Dashboard</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <!-- Customers (Receivables) -->
+    <div class="card" style="padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+                <h3 class="card-title">Customers with Outstanding Balances</h3>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">Receivables due to Arshaf Sanitary Store</p>
+            </div>
+            <span class="badge badge-danger">{{ customers|length }} Debtor(s)</span>
+        </div>
+
+        <div class="table-container" style="margin-top: 0; box-shadow: none;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Customer Name</th>
+                        <th style="text-align: right;">Amount Due</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in customers %}
+                    <tr>
+                        <td>
+                            <div style="font-weight: 700; color: var(--primary);">
+                                <a href="/customers/{{ c.id }}" class="link">{{ c.name }}</a>
+                            </div>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">{{ c.customer_code }} · {{ c.phone or 'No phone' }}</span>
+                        </td>
+                        <td style="text-align: right; font-weight: 700; font-family: var(--font-heading); color: var(--error);">
+                            Rs. {{ '%.2f'|format(c.current_balance|float) }}
+                        </td>
+                        <td style="text-align: right;">
+                            <a href="/customers/payments/new" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 0.76rem;">
+                                Receive
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 32px 0; color: var(--text-muted);">
+                            <i data-lucide="check-circle" style="width: 28px; height: 28px; color: var(--success); margin-bottom: 6px;"></i>
+                            <br>No outstanding customer balances.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Suppliers (Payables) -->
+    <div class="card" style="padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+                <h3 class="card-title">Suppliers You Owe</h3>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">Payables due for manufacturer deliveries</p>
+            </div>
+            <span class="badge badge-warning">{{ suppliers|length }} Vendor(s)</span>
+        </div>
+
+        <div class="table-container" style="margin-top: 0; box-shadow: none;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Supplier / Vendor</th>
+                        <th style="text-align: right;">Balance Payable</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in suppliers %}
+                    <tr>
+                        <td>
+                            <div style="font-weight: 700; color: var(--primary);">
+                                <a href="/suppliers/{{ s.id }}" class="link">{{ s.name }}</a>
+                            </div>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">{{ s.supplier_code }} · {{ s.phone or 'No phone' }}</span>
+                        </td>
+                        <td style="text-align: right; font-weight: 700; font-family: var(--font-heading); color: var(--error);">
+                            Rs. {{ '%.2f'|format(s.current_balance|float) }}
+                        </td>
+                        <td style="text-align: right;">
+                            <a href="/suppliers/payments/new" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 0.76rem;">
+                                Pay
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 32px 0; color: var(--text-muted);">
+                            <i data-lucide="check-circle" style="width: 28px; height: 28px; color: var(--success); margin-bottom: 6px;"></i>
+                            <br>No outstanding supplier liabilities.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

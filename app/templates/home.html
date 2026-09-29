@@ -1,0 +1,427 @@
+{% extends "dashboard.html" %}
+{% block title %}Dashboard Overview — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}Store Analytics & Operations{% endblock %}
+
+{% block content %}
+<!-- Quick Actions Toolbar -->
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; padding: 14px 20px; background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: var(--shadow-xs);">
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Quick Actions:</span>
+    </div>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="/customers/sales/new" class="btn btn-teal btn-sm" style="font-weight: 600;">
+            <i data-lucide="shopping-cart" style="width: 15px; height: 15px;"></i> POS Sale Entry
+        </a>
+        <a href="/suppliers/purchases/new" class="btn btn-secondary btn-sm">
+            <i data-lucide="truck" style="width: 15px; height: 15px;"></i> New Purchase
+        </a>
+        <a href="/stock/new" class="btn btn-secondary btn-sm">
+            <i data-lucide="package-plus" style="width: 15px; height: 15px;"></i> Add Product
+        </a>
+        <a href="/customers/payments/new" class="btn btn-secondary btn-sm">
+            <i data-lucide="credit-card" style="width: 15px; height: 15px;"></i> Record Payment
+        </a>
+        <a href="/returns" class="btn btn-secondary btn-sm">
+            <i data-lucide="rotate-ccw" style="width: 15px; height: 15px;"></i> Returns
+        </a>
+    </div>
+</div>
+
+<!-- 8 Professional KPI Cards -->
+<div class="kpi-grid">
+    <!-- 1. Today's Sales -->
+    <div class="kpi-card accent-teal">
+        <div class="kpi-top">
+            <span class="kpi-title">Today's Sales</span>
+            <div class="kpi-icon-wrapper kpi-icon-teal">
+                <i data-lucide="wallet" style="width: 20px; height: 20px;"></i>
+            </div>
+        </div>
+        <div class="kpi-value">Rs. {{ '%.2f'|format(today_sales|float) }}</div>
+        <div class="kpi-bottom">
+            <span>{{ today_sales_count }} invoice(s) today</span>
+            {% if today_vs_yesterday_pct >= 0 %}
+            <span class="kpi-badge kpi-badge-success">
+                <i data-lucide="trending-up" style="width: 12px; height: 12px;"></i> +{{ today_vs_yesterday_pct }}%
+            </span>
+            {% else %}
+            <span class="kpi-badge kpi-badge-danger">
+                <i data-lucide="trending-down" style="width: 12px; height: 12px;"></i> {{ today_vs_yesterday_pct }}%
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 2. Monthly Sales -->
+    <div class="kpi-card accent-navy">
+        <div class="kpi-top">
+            <span class="kpi-title">Monthly Revenue</span>
+            <div class="kpi-icon-wrapper kpi-icon-navy">
+                <i data-lucide="calendar" style="width: 20px; height: 20px;"></i>
+            </div>
+        </div>
+        <div class="kpi-value">Rs. {{ '%.2f'|format(month_sales|float) }}</div>
+        <div class="kpi-bottom">
+            <span>This calendar month</span>
+            <a href="/customers/sales" class="link" style="font-size: 0.78rem;">View sales &rarr;</a>
+        </div>
+    </div>
+
+    <!-- 3. Total Products -->
+    <div class="kpi-card accent-gold">
+        <div class="kpi-top">
+            <span class="kpi-title">Product Catalog</span>
+            <div class="kpi-icon-wrapper kpi-icon-gold">
+                <i data-lucide="layers" style="width: 20px; height: 20px;"></i>
+            </div>
+        </div>
+        <div class="kpi-value">{{ total_products }}</div>
+        <div class="kpi-bottom">
+            <span>Active SKUs & items</span>
+            <a href="/stock" class="link" style="font-size: 0.78rem;">Manage inventory &rarr;</a>
+        </div>
+    </div>
+
+    <!-- 4. Total Stock Value -->
+    <div class="kpi-card accent-emerald">
+        <div class="kpi-top">
+            <span class="kpi-title">Inventory Valuation</span>
+            <div class="kpi-icon-wrapper kpi-icon-emerald">
+                <i data-lucide="database" style="width: 20px; height: 20px;"></i>
+            </div>
+        </div>
+        <div class="kpi-value">Rs. {{ '%.2f'|format(stock_value|float) }}</div>
+        <div class="kpi-bottom">
+            <span>Purchase cost basis</span>
+            <a href="/reports/stock-valuation" class="link" style="font-size: 0.78rem;">Valuation report &rarr;</a>
+        </div>
+    </div>
+
+    <!-- 5. Low Stock Alerts -->
+    <div class="kpi-card accent-red">
+        <div class="kpi-top">
+            <span class="kpi-title">Low Stock Alerts</span>
+            <div class="kpi-icon-wrapper kpi-icon-red">
+                <i data-lucide="alert-triangle" style="width: 20px; height: 20px;"></i>
+            </div>
+        </div>
+        <div class="kpi-value" style="color: {% if low_stock_count > 0 %}var(--error){% else %}var(--primary){% endif %};">
+            {{ low_stock_count }}
+        </div>
+        <div class="kpi-bottom">
+            <span>Items below reorder limit</span>
+            <a href="/stock/low" class="link" style="font-size: 0.78rem; color: var(--error);">Review alerts &rarr;</a>
+        </div>
+    </div>
+
+    <!-- 6. Total Customers -->
+    <div class="kpi-card accent-navy">
+        <div class="kpi-top">
+            <span class="kpi-title">Total Customers</span>
+            <div class="kpi-icon-wrapper kpi-icon-navy">
+                <i data-lucide="users" style="width: 20px; height: 20px;"></i>
+            </div>
+        </div>
+        <div class="kpi-value">{{ total_customers }}</div>
+        <div class="kpi-bottom">
+            <span>{{ total_suppliers }} Registered Suppliers</span>
+            <a href="/customers" class="link" style="font-size: 0.78rem;">Customers list &rarr;</a>
+        </div>
+    </div>
+
+    <!-- 7. Outstanding Receivables -->
+    <div class="kpi-card accent-amber">
+        <div class="kpi-top">
+            <span class="kpi-title">Outstanding Balances</span>
+            <div class="kpi-icon-wrapper kpi-icon-amber">
+                <i data-lucide="receipt" style="width: 20px; height: 20px;"></i>
+            </div>
+        </div>
+        <div class="kpi-value" style="font-size: 1.35rem;">
+            <div style="font-size: 1.25rem; font-weight: 700; color: var(--error);">Due: Rs. {{ '%.2f'|format(receivables|float) }}</div>
+        </div>
+        <div class="kpi-bottom">
+            <span>Payable: Rs. {{ '%.2f'|format(payables|float) }}</span>
+            <a href="/reports/outstanding" class="link" style="font-size: 0.78rem;">Ledgers &rarr;</a>
+        </div>
+    </div>
+
+    <!-- 8. Net Margin / Profit -->
+    <div class="kpi-card accent-teal">
+        <div class="kpi-top">
+            <span class="kpi-title">Net Operating Balance</span>
+            <div class="kpi-icon-wrapper kpi-icon-teal">
+                <i data-lucide="bar-chart-2" style="width: 20px; height: 20px;"></i>
+            </div>
+        </div>
+        <div class="kpi-value" style="color: {% if net_profit >= 0 %}var(--success){% else %}var(--error){% endif %};">
+            Rs. {{ '%.2f'|format(net_profit|float) }}
+        </div>
+        <div class="kpi-bottom">
+            <span>Sales − Purchases (Mo.)</span>
+            <span class="kpi-badge kpi-badge-info">{{ profit_margin }}% margin</span>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div style="display: grid; grid-template-columns: 1.7fr 1.1fr; gap: 24px; margin-bottom: 28px;">
+    <!-- Sales Trend Chart -->
+    <div class="card" style="padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h3 class="card-title">Weekly Sales Trend</h3>
+                <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 2px;">Daily sales performance over the past 7 days</p>
+            </div>
+            <span class="badge badge-teal"><i data-lucide="trending-up" style="width: 12px; height: 12px;"></i> Live Updates</span>
+        </div>
+        <div style="position: relative; height: 240px; width: 100%;">
+            <canvas id="salesTrendChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Category Distribution Doughnut -->
+    <div class="card" style="padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h3 class="card-title">Sales by Category</h3>
+                <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 2px;">Distribution across product segments</p>
+            </div>
+            <a href="/stock" class="link" style="font-size: 0.8rem;">Categories</a>
+        </div>
+        <div style="position: relative; height: 240px; width: 100%; display: flex; align-items: center; justify-content: center;">
+            <canvas id="categoryChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Two-Column Section: Recent Transactions & Low Stock Alerts -->
+<div style="display: grid; grid-template-columns: 1.7fr 1.1fr; gap: 24px;">
+    <!-- Recent Transactions -->
+    <div class="card" style="padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+                <h3 class="card-title">Recent Transactions</h3>
+                <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 2px;">Latest client invoices & receipts</p>
+            </div>
+            <a href="/customers/sales" class="btn btn-secondary btn-sm">View All Invoices &rarr;</a>
+        </div>
+        <div class="table-container" style="margin-top: 0; box-shadow: none; border-color: var(--border-subtle);">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Payment</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in recent_sales %}
+                    <tr>
+                        <td style="font-weight: 700;">
+                            <a href="/customers/sales/{{ sale.id }}" class="link">{{ sale.invoice_no }}</a>
+                        </td>
+                        <td style="font-weight: 500; color: var(--primary);">
+                            {{ sale.customer.name }}
+                        </td>
+                        <td style="color: var(--text-muted); font-size: 0.82rem;">{{ sale.date }}</td>
+                        <td style="font-weight: 700; color: var(--primary); font-family: var(--font-heading);">
+                            Rs. {{ '%.2f'|format(sale.total_amount|float) }}
+                        </td>
+                        <td>
+                            <span class="badge {% if sale.payment_method == 'Cash' %}badge-success{% elif sale.payment_method == 'Bank Transfer' %}badge-teal{% else %}badge-navy{% endif %}">
+                                {{ sale.payment_method or 'Cash' }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="/print/sale/{{ sale.id }}" target="_blank" class="btn btn-secondary btn-sm" style="padding: 4px 8px;" title="Print Invoice">
+                                <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 36px 0; color: var(--text-muted);">
+                            <i data-lucide="receipt" style="width: 32px; height: 32px; margin-bottom: 8px; opacity: 0.4;"></i>
+                            <br>No recent sales found. Create your first sale from the POS screen!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Low Stock Inventory Alerts -->
+    <div class="card" style="padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+                <h3 class="card-title">Low Stock Alert</h3>
+                <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 2px;">Items needing urgent reordering</p>
+            </div>
+            <a href="/stock/low" class="btn btn-secondary btn-sm" style="color: var(--error);">View All</a>
+        </div>
+        <div class="table-container" style="margin-top: 0; box-shadow: none; border-color: var(--border-subtle);">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Stock</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in low_stock %}
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600; color: var(--primary);">{{ item.name or item.brand }}</div>
+                            <div style="font-size: 0.76rem; color: var(--text-muted);">{{ item.item_code }} · {{ item.category }}</div>
+                        </td>
+                        <td>
+                            <span class="badge badge-danger">
+                                {{ item.current_stock }} left
+                            </span>
+                        </td>
+                        <td>
+                            <a href="/suppliers/purchases/new" class="btn btn-secondary btn-sm" style="padding: 4px 10px; font-size: 0.78rem;">
+                                Reorder
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 36px 0; color: var(--text-muted);">
+                            <i data-lucide="check-circle" style="width: 32px; height: 32px; color: var(--success); margin-bottom: 8px; opacity: 0.8;"></i>
+                            <br>All stock levels are optimal.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Setup -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Sales Trend Line/Area Chart
+    const trendLabels = {{ sales_trend_labels|safe }};
+    const trendData = {{ sales_trend_data|safe }};
+    const trendEl = document.getElementById('salesTrendChart');
+
+    if (trendEl && trendLabels && trendLabels.length > 0) {
+        const ctx = trendEl.getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 220);
+        gradient.addColorStop(0, 'rgba(15, 157, 148, 0.35)');
+        gradient.addColorStop(1, 'rgba(15, 157, 148, 0.00)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: trendLabels,
+                datasets: [{
+                    label: 'Revenue (Rs.)',
+                    data: trendData,
+                    borderColor: '#0F9D94',
+                    borderWidth: 2.5,
+                    backgroundColor: gradient,
+                    fill: true,
+                    tension: 0.35,
+                    pointBackgroundColor: '#FFFFFF',
+                    pointBorderColor: '#0F9D94',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#12304A',
+                        titleFont: { family: 'Outfit', size: 13 },
+                        bodyFont: { family: 'Inter', size: 12 },
+                        padding: 10,
+                        callbacks: {
+                            label: function(context) {
+                                return 'Rs. ' + context.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { family: 'Inter', size: 11 }, color: '#64748B' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#F1F5F9' },
+                        ticks: {
+                            font: { family: 'Inter', size: 11 },
+                            color: '#64748B',
+                            callback: function(value) { return 'Rs. ' + value; }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 2. Category Doughnut Chart
+    const catLabels = {{ cat_labels|safe }};
+    const catData = {{ cat_data|safe }};
+    const catEl = document.getElementById('categoryChart');
+
+    if (catEl && catLabels && catLabels.length > 0) {
+        new Chart(catEl, {
+            type: 'doughnut',
+            data: {
+                labels: catLabels,
+                datasets: [{
+                    data: catData,
+                    backgroundColor: [
+                        '#0F9D94', // Teal
+                        '#12304A', // Deep Navy
+                        '#C6A76A', // Champagne Gold
+                        '#16A34A', // Emerald
+                        '#0284C7', // Sky Blue
+                        '#F59E0B', // Amber
+                        '#8B5CF6'  // Purple
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#FFFFFF'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 12,
+                            font: { family: 'Inter', size: 11 },
+                            color: '#1E293B'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#12304A',
+                        padding: 10,
+                        bodyFont: { family: 'Inter', size: 12 }
+                    }
+                },
+                cutout: '68%'
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

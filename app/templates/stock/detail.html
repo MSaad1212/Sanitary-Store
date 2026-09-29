@@ -1,0 +1,150 @@
+{% extends "dashboard.html" %}
+{% block title %}{{ item.name or item.item_code }} — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}Product Detail: {{ item.name or item.item_code }}{% endblock %}
+
+{% block content %}
+<!-- Product Overview Card -->
+<div class="card" style="padding: 24px; margin-bottom: 28px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+        <div style="display: flex; gap: 18px; align-items: flex-start;">
+            <div style="width: 58px; height: 58px; border-radius: var(--radius-lg); background: var(--secondary-light); color: var(--secondary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(15, 157, 148, 0.2);">
+                <i data-lucide="package" style="width: 28px; height: 28px;"></i>
+            </div>
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <span class="badge badge-navy" style="font-weight: 700;">{{ item.item_code }}</span>
+                    <span class="badge badge-teal">{{ item.category }}</span>
+                    {% if item.description %}
+                    <span class="badge badge-gold">{{ item.description }}</span>
+                    {% endif %}
+                </div>
+                <h2 style="font-size: 1.45rem; color: var(--primary); margin: 6px 0 4px; font-weight: 700;">
+                    {{ item.name or item.brand }}
+                </h2>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); display: flex; gap: 12px; align-items: center;">
+                    <span>Brand: <strong>{{ item.brand }}</strong></span>
+                    {% if item.barcode %}
+                    <span>·</span>
+                    <span>Barcode: <strong>{{ item.barcode }}</strong></span>
+                    {% endif %}
+                    <span>·</span>
+                    <span>Unit: <strong>{{ item.unit }}</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="/customers/sales/new" class="btn btn-teal btn-sm">
+                <i data-lucide="shopping-cart" style="width: 15px; height: 15px;"></i> POS Sale
+            </a>
+            <a href="/stock/{{ item.id }}/edit" class="btn btn-secondary btn-sm">
+                <i data-lucide="edit-2" style="width: 15px; height: 15px;"></i> Edit
+            </a>
+            <a href="/stock/{{ item.id }}/adjust" class="btn btn-secondary btn-sm">
+                <i data-lucide="sliders" style="width: 15px; height: 15px;"></i> Reconcile Stock
+            </a>
+            <a href="/stock" class="btn btn-secondary btn-sm">Back</a>
+            <form action="/stock/{{ item.id }}/delete" method="POST" style="display:inline;" onsubmit="confirmDelete(event, this, 'product')">
+                <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--error);">
+                    <i data-lucide="trash-2" style="width: 15px; height: 15px;"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Metrics Row -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle);">
+        <div style="background: var(--bg-subtle); padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <div style="font-size: 0.76rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Current Stock</div>
+            <div style="font-size: 1.35rem; font-weight: 700; color: var(--primary); font-family: var(--font-heading);">
+                {{ item.current_stock }} <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">{{ item.unit }}</span>
+            </div>
+            {% if item.current_stock <= item.reorder_level %}
+            <span class="badge badge-danger" style="margin-top: 4px;">Below Reorder ({{ item.reorder_level }})</span>
+            {% else %}
+            <span class="badge badge-success" style="margin-top: 4px;">Optimal Level</span>
+            {% endif %}
+        </div>
+
+        <div style="background: var(--bg-subtle); padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <div style="font-size: 0.76rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Purchase Cost</div>
+            <div style="font-size: 1.35rem; font-weight: 700; color: var(--primary); font-family: var(--font-heading);">
+                Rs. {{ '%.2f'|format(item.purchase_price|float) }}
+            </div>
+            <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 4px;">Supplier acquisition price</div>
+        </div>
+
+        <div style="background: var(--bg-subtle); padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <div style="font-size: 0.76rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Retail Sale Price</div>
+            <div style="font-size: 1.35rem; font-weight: 700; color: var(--secondary); font-family: var(--font-heading);">
+                Rs. {{ '%.2f'|format(item.sale_price|float) }}
+            </div>
+            <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 4px;">Customer billing price</div>
+        </div>
+
+        <div style="background: var(--bg-subtle); padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <div style="font-size: 0.76rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Gross Margin / Unit</div>
+            {% set margin = item.sale_price - item.purchase_price %}
+            <div style="font-size: 1.35rem; font-weight: 700; color: var(--success); font-family: var(--font-heading);">
+                + Rs. {{ '%.2f'|format(margin|float) }}
+            </div>
+            <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 4px;">Per single piece</div>
+        </div>
+    </div>
+</div>
+
+<!-- Stock Movement History Table -->
+<div class="card" style="padding: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+            <h3 class="card-title">Stock Audit & Movements History</h3>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">Complete chronological record of all purchases, sales, and adjustments</p>
+        </div>
+        <span class="badge badge-navy">{{ movements|length }} Total Transactions</span>
+    </div>
+
+    <div class="table-container" style="margin-top: 0; box-shadow: none;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Movement Type</th>
+                    <th>Quantity Change</th>
+                    <th>Resulting Stock</th>
+                    <th>Reference / Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in movements %}
+                <tr>
+                    <td style="font-size: 0.85rem; color: var(--text-secondary);">
+                        {{ m.created_at.strftime('%Y-%m-%d %H:%M') if m.created_at else '—' }}
+                    </td>
+                    <td>
+                        <span class="badge {% if m.movement_type == 'sale' %}badge-danger{% elif m.movement_type == 'purchase' %}badge-success{% elif m.movement_type == 'adjustment' %}badge-warning{% else %}badge-teal{% endif %}">
+                            {{ m.movement_type|replace('_', ' ')|capitalize }}
+                        </span>
+                    </td>
+                    <td style="font-weight: 700; font-family: var(--font-heading); color: {% if m.quantity_change > 0 %}var(--success){% else %}var(--error){% endif %};">
+                        {{ '%+d'|format(m.quantity_change) }} {{ item.unit }}
+                    </td>
+                    <td style="font-weight: 600; color: var(--primary);">
+                        {{ m.quantity_after }} {{ item.unit }}
+                    </td>
+                    <td style="color: var(--text-secondary); font-size: 0.85rem;">
+                        {{ m.note or '—' }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px 0; color: var(--text-muted);">
+                        <i data-lucide="history" style="width: 32px; height: 32px; margin-bottom: 8px; opacity: 0.4;"></i>
+                        <br>No movements recorded yet for this item.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

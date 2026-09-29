@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Daily Cash Summary - {{ day }}</title>
+    <link rel="icon" href="/static/img/logo.png" type="image/jpeg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4;
+            margin: 16mm 18mm 20mm;
+            @bottom-center {
+                content: "Page " counter(page) " of " counter(pages);
+                font-family: 'Inter', sans-serif;
+                font-size: 8pt;
+                color: #94a3b8;
+            }
+        }
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            font-size: 10pt;
+            color: #1e293b;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            width: 174mm;
+        }
+        table.items thead { display: table-header-group; }
+        table.items tr { break-inside: avoid; page-break-inside: avoid; }
+        .header, .party-panel { break-after: avoid; page-break-after: avoid; }
+        .summary-block { break-inside: avoid; page-break-inside: avoid; }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 18px;
+            margin-bottom: 8px;
+            border-bottom: 3px solid #12304A;
+        }
+        .shop-info { display: flex; align-items: center; gap: 14px; }
+        .logo-mark {
+            width: 44px; height: 44px; border-radius: 10px;
+            background: linear-gradient(135deg, #12304A, #0F9D94);
+            border: 1.5px solid #C6A76A;
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 16pt; letter-spacing: -0.5px; flex-shrink: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+        .shop-info h1 { font-family: 'Outfit', sans-serif; font-size: 19pt; font-weight: 800; margin: 0 0 2px; color: #12304A; letter-spacing: -0.5px; }
+        .shop-info .sub { color: #64748b; font-size: 9pt; }
+        .document-title { text-align: right; padding-top: 2px; }
+        .document-title h2 { font-family: 'Outfit', sans-serif; font-size: 16pt; font-weight: 700; color: #0F9D94; margin: 0 0 4px; text-transform: uppercase; letter-spacing: 1px; }
+        .document-title .meta { color: #64748b; font-size: 9pt; }
+
+        table.items { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        table.items th {
+            background-color: #12304A; color: #ffffff; font-weight: 600; font-size: 8.5pt;
+            text-transform: uppercase; letter-spacing: 0.6px; text-align: left; padding: 10px 12px;
+        }
+        table.items th.right { text-align: right; }
+        table.items th.center { text-align: center; }
+        table.items td { padding: 9px 12px; border-bottom: 1px solid #eef1f5; font-size: 9pt; vertical-align: middle; }
+        table.items tbody tr:nth-child(even) { background-color: #fafbfc; }
+        table.items tbody tr:last-child td { border-bottom: 2px solid #cbd5e1; }
+        .right { text-align: right !important; }
+        .center { text-align: center !important; }
+        .amt-debit { color: #dc2626; font-weight: 600; }
+        .amt-credit { color: #16a34a; font-weight: 600; }
+        .amt-balance { font-weight: 700; color: #12304A; }
+        .dash { color: #cbd5e1; }
+        .empty-state { padding: 40px 20px; color: #94a3b8; font-style: italic; text-align: center; font-size: 9pt; }
+
+        .summary-block { margin-top: 24px; display: flex; justify-content: flex-end; }
+        .summary-table { width: 340px; border-collapse: collapse; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+        .summary-table td { padding: 9px 14px; font-size: 9.5pt; color: #475569; border-bottom: 1px solid #eef1f5; }
+        .summary-table tr:last-child td { border-bottom: none; }
+        .summary-table tr.total-row td { color: #12304A; font-weight: 700; border-top: 2px solid #cbd5e1; }
+        .summary-table tr.balance-row td { color: #ffffff; background: #12304A; font-size: 11pt; font-weight: 800; }
+        .footer-note { margin-top: 32px; padding-top: 14px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 8pt; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="shop-info">
+            <div class="logo-mark">A</div>
+            <div>
+                <h1>{{ shop_name }}</h1>
+                <div class="sub">{{ shop_tagline }}</div>
+            </div>
+        </div>
+        <div class="document-title">
+            <h2>Daily Cash Summary</h2>
+            <div class="meta">Settlement Date: {{ day }}</div>
+        </div>
+    </div>
+
+    <table class="items">
+        <thead>
+            <tr>
+                <th style="width: 50%;">Transaction Narrative</th>
+                <th class="right" style="width: 25%;">Cash Inflow</th>
+                <th class="right" style="width: 25%;">Cash Outflow</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in rows %}
+            <tr>
+                <td style="font-weight: 500; color: #12304A;">{{ r.desc }}</td>
+                <td class="right">{% if r.in %}<span class="amt-credit">Rs. {{ '%.2f'|format(r.in|float) }}</span>{% else %}<span class="dash">—</span>{% endif %}</td>
+                <td class="right">{% if r.out %}<span class="amt-debit">Rs. {{ '%.2f'|format(r.out|float) }}</span>{% else %}<span class="dash">—</span>{% endif %}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" class="empty-state">No cash transactions recorded for this day.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="summary-block">
+        <table class="summary-table">
+            <tr>
+                <td>Total Cash In</td>
+                <td class="right amt-credit">Rs. {{ '%.2f'|format(total_in|float) }}</td>
+            </tr>
+            <tr>
+                <td>Total Cash Out</td>
+                <td class="right amt-debit">Rs. {{ '%.2f'|format(total_out|float) }}</td>
+            </tr>
+            <tr class="balance-row">
+                <td style="border-radius: 6px 0 0 6px;">Net Cash Position</td>
+                <td class="right" style="border-radius: 0 6px 6px 0;">Rs. {{ '%.2f'|format(total_in|float - total_out|float) }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="footer-note">{{ shop_name }} &middot; Daily Cash Book Register &middot; Arshaf Sanitary Store Operations</div>
+
+</body>
+</html>

@@ -1,0 +1,132 @@
+{% extends "dashboard.html" %}
+{% block title %}Customers — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}Customer Accounts & Client Ledgers{% endblock %}
+
+{% block content %}
+<div class="card" style="padding: 20px; margin-bottom: 24px;">
+    <div class="toolbar" style="margin-bottom: 0;">
+        <form method="GET" class="filter-bar" style="flex: 1;">
+            <div style="position: relative; min-width: 260px;">
+                <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-muted);"></i>
+                <input type="text" name="q" class="form-control" placeholder="Search name, code, phone..." value="{{ q }}" style="padding-left: 38px;">
+            </div>
+
+            <select name="status" class="form-control" style="max-width: 160px;">
+                <option value="">All Statuses</option>
+                <option value="Active" {% if status == 'Active' %}selected{% endif %}>Active</option>
+                <option value="Inactive" {% if status == 'Inactive' %}selected{% endif %}>Inactive</option>
+            </select>
+
+            <button type="submit" class="btn btn-primary" style="width: auto;">Search</button>
+            <a href="/customers" class="btn btn-secondary" style="width: auto;">Reset</a>
+        </form>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="/customers/sales" class="btn btn-secondary" style="width: auto;">
+                <i data-lucide="receipt" style="width: 15px; height: 15px;"></i> Invoices
+            </a>
+            <a href="/customers/sales/new" class="btn btn-secondary" style="width: auto;">
+                <i data-lucide="shopping-cart" style="width: 15px; height: 15px;"></i> POS Sale
+            </a>
+            <a href="/customers/payments/new" class="btn btn-secondary" style="width: auto;">
+                <i data-lucide="credit-card" style="width: 15px; height: 15px;"></i> Record Payment
+            </a>
+            <a href="/customers/new" class="btn btn-teal" style="width: auto;">
+                <i data-lucide="user-plus" style="width: 16px; height: 16px;"></i> Add Customer
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Customer / Code</th>
+                <th>Contact Phone</th>
+                <th>Project / Site Info</th>
+                <th>Account Balance</th>
+                <th>Status</th>
+                <th style="text-align: right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in customers %}
+            <tr>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 36px; height: 36px; border-radius: var(--radius-full); background: var(--secondary-light); color: var(--secondary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0;">
+                            {{ c.name[0]|upper }}
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; color: var(--primary);">
+                                <a href="/customers/{{ c.id }}" class="link">{{ c.name }}</a>
+                                {% if c.is_walk_in %}
+                                <span class="badge badge-teal" style="font-size: 0.68rem; margin-left: 4px;">Walk-in</span>
+                                {% endif %}
+                            </div>
+                            <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600;">{{ c.customer_code }}</span>
+                        </div>
+                    </div>
+                </td>
+
+                <td style="color: var(--text-secondary); font-size: 0.88rem;">
+                    {{ c.phone or '—' }}
+                </td>
+
+                <td style="color: var(--text-secondary); font-size: 0.85rem;">
+                    {{ c.vehicle_info or '—' }}
+                </td>
+
+                <td>
+                    {% if c.current_balance > 0 %}
+                    <span style="font-family: var(--font-heading); font-weight: 700; color: var(--error);">
+                        Due: Rs. {{ '%.2f'|format(c.current_balance|float) }}
+                    </span>
+                    {% elif c.current_balance < 0 %}
+                    <span style="font-family: var(--font-heading); font-weight: 700; color: var(--success);">
+                        Credit: Rs. {{ '%.2f'|format(c.current_balance|abs|float) }}
+                    </span>
+                    {% else %}
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">Settled (Rs. 0.00)</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if c.status == 'Active' %}
+                    <span class="badge badge-success">Active</span>
+                    {% else %}
+                    <span class="badge badge-danger">{{ c.status }}</span>
+                    {% endif %}
+                </td>
+
+                <td style="text-align: right;">
+                    <div style="display: inline-flex; gap: 6px;">
+                        <a href="/customers/{{ c.id }}" class="btn btn-secondary btn-sm" title="View Profile & Ledger">
+                            <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
+                        </a>
+                        <a href="/customers/{{ c.id }}/edit" class="btn btn-secondary btn-sm" title="Edit Customer">
+                            <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                        </a>
+                        {% if not c.is_walk_in %}
+                        <form action="/customers/{{ c.id }}/delete" method="POST" style="display:inline;" onsubmit="confirmDelete(event, this, 'customer')">
+                            <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--error);" title="Delete">
+                                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
+                    <i data-lucide="users" style="width: 36px; height: 36px; margin-bottom: 8px; opacity: 0.4;"></i>
+                    <p style="font-size: 0.95rem;">No customer records found.</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

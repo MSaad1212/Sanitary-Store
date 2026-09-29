@@ -1,0 +1,85 @@
+{% extends "dashboard.html" %}
+{% block title %}Low Stock Alerts — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}Low Stock & Reorder Alerts{% endblock %}
+
+{% block content %}
+<div class="card" style="padding: 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+    <div>
+        <h3 style="font-size: 1.1rem; color: var(--primary); margin: 0; font-weight: 700;">Reorder Threshold Triggered</h3>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 2px 0 0;">
+            The following sanitary items have current inventory levels at or below their configured safety margin.
+        </p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <a href="/suppliers/purchases/new" class="btn btn-teal btn-sm">
+            <i data-lucide="plus-circle" style="width: 14px; height: 14px;"></i> Bulk Purchase Order
+        </a>
+        <a href="/stock" class="btn btn-secondary btn-sm">All Inventory</a>
+    </div>
+</div>
+
+<div class="table-container" style="margin-top: 0;">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Code & Brand</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Current Stock</th>
+                <th>Reorder Threshold</th>
+                <th>Deficit</th>
+                <th style="text-align: right;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>
+                    <span style="font-weight: 700; color: var(--primary);">
+                        <a href="/stock/{{ item.id }}" class="link">{{ item.item_code }}</a>
+                    </span>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">{{ item.brand }}</div>
+                </td>
+                <td style="font-weight: 600; color: var(--primary);">
+                    {{ item.name or item.brand }}
+                </td>
+                <td>
+                    <span class="badge badge-teal">{{ item.category }}</span>
+                </td>
+                <td>
+                    {% if item.current_stock <= 0 %}
+                    <span class="badge badge-danger">Out of Stock (0)</span>
+                    {% else %}
+                    <span class="badge badge-warning">{{ item.current_stock }} {{ item.unit }}</span>
+                    {% endif %}
+                </td>
+                <td style="color: var(--text-secondary); font-weight: 600;">
+                    {{ item.reorder_level }} {{ item.unit }}
+                </td>
+                <td style="color: var(--error); font-weight: 700;">
+                    - {{ item.reorder_level - item.current_stock if item.reorder_level > item.current_stock else 0 }} {{ item.unit }}
+                </td>
+                <td style="text-align: right;">
+                    <div style="display: inline-flex; gap: 6px;">
+                        <a href="/suppliers/purchases/new" class="btn btn-teal btn-sm" style="padding: 4px 10px; font-size: 0.78rem;">
+                            Purchase
+                        </a>
+                        <a href="/stock/{{ item.id }}" class="btn btn-secondary btn-sm" style="padding: 4px 10px; font-size: 0.78rem;">
+                            Details
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
+                    <i data-lucide="check-circle-2" style="width: 36px; height: 36px; color: var(--success); margin-bottom: 8px;"></i>
+                    <p style="font-size: 1rem; font-weight: 600; color: var(--primary);">All inventory levels are optimal</p>
+                    <p style="font-size: 0.85rem;">No items currently fall below their minimum safety thresholds.</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

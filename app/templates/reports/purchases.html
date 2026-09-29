@@ -1,0 +1,75 @@
+{% extends "dashboard.html" %}
+{% block title %}Purchase Report — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}Inbound Purchases Report{% endblock %}
+
+{% block content %}
+<div class="card" style="padding: 20px; margin-bottom: 24px;">
+    <form method="GET" class="filter-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <span style="font-size: 0.85rem; font-weight: 600; color: var(--primary);">Filter Date Range:</span>
+            <input type="date" name="date_from" class="form-control" value="{{ date_from }}" style="max-width: 160px;">
+            <input type="date" name="date_to" class="form-control" value="{{ date_to }}" style="max-width: 160px;">
+            <button type="submit" class="btn btn-primary" style="width: auto;">Apply Range</button>
+        </div>
+        <a href="/reports" class="btn btn-secondary" style="width: auto;">&larr; Reports Dashboard</a>
+    </form>
+</div>
+
+<!-- Summary Card -->
+<div class="kpi-card accent-navy" style="margin-bottom: 24px; padding: 20px 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <span class="kpi-title">Total Supplier Purchases Billed</span>
+            <div class="kpi-value" style="font-size: 1.85rem; color: var(--primary); margin-top: 4px;">
+                Rs. {{ '%.2f'|format(total|float) }}
+            </div>
+        </div>
+        <div style="text-align: right;">
+            <span class="badge badge-navy" style="font-size: 0.85rem;">{{ purchases|length }} Bills Recorded</span>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">{{ date_from }} to {{ date_to }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="table-container" style="margin-top: 0;">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Bill / Inv #</th>
+                <th>Date</th>
+                <th>Supplier</th>
+                <th>Total Billed</th>
+                <th>Amount Paid</th>
+                <th style="text-align: right;">Remaining Payable</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in purchases %}
+            <tr>
+                <td style="font-weight: 700;">
+                    <a href="/suppliers/purchases/{{ p.id }}" class="link">{{ p.invoice_no }}</a>
+                </td>
+                <td style="color: var(--text-secondary); font-size: 0.85rem;">{{ p.date }}</td>
+                <td style="font-weight: 600; color: var(--primary);">{{ p.supplier.name }}</td>
+                <td style="font-weight: 700; font-family: var(--font-heading); color: var(--primary);">
+                    Rs. {{ '%.2f'|format(p.total_amount|float) }}
+                </td>
+                <td style="color: var(--success); font-family: var(--font-heading); font-weight: 600;">
+                    Rs. {{ '%.2f'|format(p.amount_paid|float) }}
+                </td>
+                <td style="text-align: right; font-weight: 700; font-family: var(--font-heading); color: {% if p.balance > 0 %}var(--error){% else %}var(--success){% endif %};">
+                    Rs. {{ '%.2f'|format(p.balance|float) }}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
+                    <i data-lucide="truck" style="width: 36px; height: 36px; margin-bottom: 8px; opacity: 0.4;"></i>
+                    <p style="font-size: 0.95rem;">No purchases found in this date range.</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

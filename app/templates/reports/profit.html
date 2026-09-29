@@ -1,0 +1,80 @@
+{% extends "dashboard.html" %}
+{% block title %}Profitability Report — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}Gross Profitability by Product{% endblock %}
+
+{% block content %}
+<div class="card" style="padding: 20px; margin-bottom: 24px;">
+    <form method="GET" class="filter-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <span style="font-size: 0.85rem; font-weight: 600; color: var(--primary);">Period Range:</span>
+            <input type="date" name="date_from" class="form-control" value="{{ date_from }}" style="max-width: 160px;">
+            <input type="date" name="date_to" class="form-control" value="{{ date_to }}" style="max-width: 160px;">
+            <button type="submit" class="btn btn-primary" style="width: auto;">Calculate Profit</button>
+        </div>
+        <a href="/reports" class="btn btn-secondary" style="width: auto;">&larr; Reports Dashboard</a>
+    </form>
+</div>
+
+<!-- KPI Summary Card -->
+<div class="kpi-card accent-emerald" style="margin-bottom: 24px; padding: 20px 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <span class="kpi-title">Gross Operating Profit in Selected Range</span>
+            <div class="kpi-value" style="font-size: 1.85rem; color: var(--success); margin-top: 4px;">
+                Rs. {{ '%.2f'|format(total_profit|float) }}
+            </div>
+        </div>
+        <div style="text-align: right;">
+            <span class="badge badge-success" style="font-size: 0.85rem;">{{ rows|length }} Sold Product Lines</span>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">{{ date_from }} to {{ date_to }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="table-container" style="margin-top: 0;">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Invoice #</th>
+                <th>Product Item</th>
+                <th>Qty Sold</th>
+                <th>Sale Revenue</th>
+                <th>Cost Basis</th>
+                <th style="text-align: right;">Net Item Profit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in rows %}
+            <tr>
+                <td style="color: var(--text-secondary); font-size: 0.85rem;">{{ r.sale.date }}</td>
+                <td style="font-weight: 700;">
+                    <a href="/customers/sales/{{ r.sale.id }}" class="link">{{ r.sale.invoice_no }}</a>
+                </td>
+                <td>
+                    <div style="font-weight: 600; color: var(--primary);">{{ r.line.item.name or r.line.item.brand }}</div>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">{{ r.line.item.item_code }} · {{ r.line.item.category }}</span>
+                </td>
+                <td style="font-weight: 600;">{{ r.line.quantity }} {{ r.line.item.unit }}</td>
+                <td style="font-weight: 600; font-family: var(--font-heading); color: var(--primary);">
+                    Rs. {{ '%.2f'|format(r.revenue|float) }}
+                </td>
+                <td style="color: var(--text-secondary); font-family: var(--font-heading);">
+                    Rs. {{ '%.2f'|format(r.cost|float) }}
+                </td>
+                <td style="text-align: right; font-weight: 700; font-family: var(--font-heading); color: {% if r.profit >= 0 %}var(--success){% else %}var(--error){% endif %};">
+                    Rs. {{ '%.2f'|format(r.profit|float) }}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
+                    <i data-lucide="trending-up" style="width: 36px; height: 36px; margin-bottom: 8px; opacity: 0.4;"></i>
+                    <p style="font-size: 0.95rem;">No sales transactions found in this period.</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

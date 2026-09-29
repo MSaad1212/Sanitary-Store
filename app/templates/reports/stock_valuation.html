@@ -1,0 +1,90 @@
+{% extends "dashboard.html" %}
+{% block title %}Stock Valuation Report — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}Inventory Asset Valuation Report{% endblock %}
+
+{% block content %}
+<div class="card" style="padding: 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+    <div>
+        <h3 style="font-size: 1.1rem; color: var(--primary); margin: 0; font-weight: 700;">Live Asset Stock Valuation</h3>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 2px 0 0;">
+            Valuation calculated from current warehouse stock on hand multiplied by unit purchase acquisition cost.
+        </p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <a href="/reports" class="btn btn-secondary btn-sm">&larr; Reports Dashboard</a>
+        <a href="/stock" class="btn btn-teal btn-sm">Manage Inventory</a>
+    </div>
+</div>
+
+<!-- KPI Valuation Banner -->
+<div class="kpi-card accent-gold" style="margin-bottom: 24px; padding: 20px 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <span class="kpi-title">Grand Total Warehouse Asset Valuation</span>
+            <div class="kpi-value" style="font-size: 2rem; color: var(--primary); margin-top: 4px;">
+                Rs. {{ '%.2f'|format(grand|float) }}
+            </div>
+        </div>
+        <div style="text-align: right;">
+            <span class="badge badge-gold" style="font-size: 0.85rem;">{{ rows|length }} Active SKUs</span>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Purchase Cost Basis</div>
+        </div>
+    </div>
+</div>
+
+<div class="table-container" style="margin-top: 0;">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Item Code</th>
+                <th>Product Description</th>
+                <th>Brand</th>
+                <th>Quantity in Stock</th>
+                <th>Unit Cost</th>
+                <th style="text-align: right;">Total Asset Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in rows %}
+            <tr>
+                <td style="font-weight: 700;">
+                    <a href="/stock/{{ r.item.id }}" class="link">{{ r.item.item_code }}</a>
+                </td>
+                <td style="font-weight: 600; color: var(--primary);">
+                    {{ r.item.name or r.item.brand }}
+                </td>
+                <td>
+                    <span class="badge badge-navy">{{ r.item.brand }}</span>
+                </td>
+                <td style="font-weight: 600;">
+                    {{ r.item.current_stock }} {{ r.item.unit }}
+                </td>
+                <td style="font-family: var(--font-heading); color: var(--text-secondary);">
+                    Rs. {{ '%.2f'|format(r.item.purchase_price|float) }}
+                </td>
+                <td style="text-align: right; font-weight: 700; font-family: var(--font-heading); color: var(--primary);">
+                    Rs. {{ '%.2f'|format(r.value|float) }}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
+                    <i data-lucide="package" style="width: 36px; height: 36px; margin-bottom: 8px; opacity: 0.4;"></i>
+                    <p style="font-size: 0.95rem;">No active items in stock.</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr style="background: var(--bg-subtle);">
+                <td colspan="5" style="text-align: right; font-weight: 700; color: var(--primary); font-size: 1rem;">
+                    Total Valuation:
+                </td>
+                <td style="text-align: right; font-weight: 800; font-family: var(--font-heading); color: var(--secondary); font-size: 1.15rem;">
+                    Rs. {{ '%.2f'|format(grand|float) }}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+{% endblock %}

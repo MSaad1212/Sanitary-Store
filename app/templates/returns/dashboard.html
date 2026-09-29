@@ -1,0 +1,150 @@
+{% extends "dashboard.html" %}
+{% block title %}Returns Operations — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}Returns Management Dashboard{% endblock %}
+
+{% block content %}
+<div class="card" style="padding: 20px; margin-bottom: 24px;">
+    <div class="toolbar" style="margin-bottom: 0;">
+        <form method="GET" class="filter-bar" style="flex: 1;">
+            <input type="date" name="day" class="form-control" value="{{ selected }}" style="max-width: 170px;">
+            <input type="text" name="q" class="form-control" placeholder="Search product..." value="{{ q }}" style="max-width: 180px;">
+            
+            <select name="reason" class="form-control" style="max-width: 160px;">
+                <option value="">All Return Reasons</option>
+                {% for r in reasons %}
+                <option value="{{ r }}" {% if reason == r %}selected{% endif %}>{{ r }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary" style="width: auto;">Filter</button>
+            <a href="/returns" class="btn btn-secondary" style="width: auto;">Today</a>
+        </form>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="/returns/customer/new" class="btn btn-teal" style="width: auto;">
+                <i data-lucide="rotate-ccw" style="width: 15px; height: 15px;"></i> Customer Return
+            </a>
+            <a href="/returns/supplier/new" class="btn btn-secondary" style="width: auto;">
+                <i data-lucide="corner-up-right" style="width: 15px; height: 15px;"></i> Supplier Return
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Summary Metric Cards -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px;">
+    <div class="kpi-card accent-teal">
+        <div class="kpi-top">
+            <span class="kpi-title">Customer Returns (Inbound)</span>
+            <div class="kpi-icon-wrapper kpi-icon-teal">
+                <i data-lucide="rotate-ccw" style="width: 20px; height: 20px;"></i>
+            </div>
+        </div>
+        <div class="kpi-value">Rs. {{ '%.2f'|format(customer_total|float) }}</div>
+        <div class="kpi-bottom">
+            <span>{{ customer_returns|length }} return order(s) for {{ selected }}</span>
+            <span class="badge badge-teal">Stock Restocked</span>
+        </div>
+    </div>
+
+    <div class="kpi-card accent-amber">
+        <div class="kpi-top">
+            <span class="kpi-title">Supplier Returns (Outbound)</span>
+            <div class="kpi-icon-wrapper kpi-icon-amber">
+                <i data-lucide="truck" style="width: 20px; height: 20px;"></i>
+            </div>
+        </div>
+        <div class="kpi-value">Rs. {{ '%.2f'|format(supplier_total|float) }}</div>
+        <div class="kpi-bottom">
+            <span>{{ supplier_returns|length }} return dispatch(es) for {{ selected }}</span>
+            <span class="badge badge-warning">Debited to Supplier</span>
+        </div>
+    </div>
+</div>
+
+<!-- Tables -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <!-- Customer Returns Table -->
+    <div class="card" style="padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 class="card-title">Customer Inward Returns</h3>
+            <span class="badge badge-teal">{{ customer_returns|length }}</span>
+        </div>
+        <div class="table-container" style="margin-top: 0; box-shadow: none;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Return #</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Refund</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in customer_returns %}
+                    <tr>
+                        <td style="font-weight: 700; color: var(--primary);">{{ r.return_no }}</td>
+                        <td>{{ r.customer.name }}</td>
+                        <td style="font-weight: 700; color: var(--secondary);">Rs. {{ '%.2f'|format(r.total_amount|float) }}</td>
+                        <td><span class="badge badge-navy">{{ r.refund_method or 'Cash' }}</span></td>
+                        <td>
+                            <a href="/print/customer-return/{{ r.id }}" class="btn btn-secondary btn-sm" target="_blank" title="Print">
+                                <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 32px 0; color: var(--text-muted);">
+                            No customer returns on {{ selected }}.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Supplier Returns Table -->
+    <div class="card" style="padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 class="card-title">Supplier Outward Returns</h3>
+            <span class="badge badge-navy">{{ supplier_returns|length }}</span>
+        </div>
+        <div class="table-container" style="margin-top: 0; box-shadow: none;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Return #</th>
+                        <th>Supplier</th>
+                        <th>Amount</th>
+                        <th>Refund</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in supplier_returns %}
+                    <tr>
+                        <td style="font-weight: 700; color: var(--primary);">{{ r.return_no }}</td>
+                        <td>{{ r.supplier.name }}</td>
+                        <td style="font-weight: 700; color: var(--primary);">Rs. {{ '%.2f'|format(r.total_amount|float) }}</td>
+                        <td><span class="badge badge-navy">{{ r.refund_method or 'Cash' }}</span></td>
+                        <td>
+                            <a href="/print/supplier-return/{{ r.id }}" class="btn btn-secondary btn-sm" target="_blank" title="Print">
+                                <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 32px 0; color: var(--text-muted);">
+                            No supplier returns on {{ selected }}.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

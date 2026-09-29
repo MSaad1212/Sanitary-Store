@@ -1,0 +1,92 @@
+{% extends "dashboard.html" %}
+{% block title %}Purchases & Bills — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}Supplier Purchase Bills{% endblock %}
+
+{% block content %}
+<div class="card" style="padding: 20px; margin-bottom: 24px;">
+    <div class="toolbar" style="margin-bottom: 0;">
+        <form method="GET" class="filter-bar" style="flex: 1;">
+            <div style="position: relative; min-width: 150px;">
+                <input type="text" name="invoice_no" class="form-control" placeholder="Bill / Inv #..." value="{{ filters.invoice_no }}">
+            </div>
+
+            <select name="supplier_id" class="form-control" style="max-width: 200px;">
+                <option value="">All Suppliers</option>
+                {% for s in suppliers %}
+                <option value="{{ s.id }}" {% if filters.supplier_id|string == s.id|string %}selected{% endif %}>{{ s.name }}</option>
+                {% endfor %}
+            </select>
+
+            <input type="date" name="date_from" class="form-control" value="{{ filters.date_from }}" title="Date From" style="max-width: 160px;">
+            <input type="date" name="date_to" class="form-control" value="{{ filters.date_to }}" title="Date To" style="max-width: 160px;">
+
+            <button type="submit" class="btn btn-primary" style="width: auto;">Filter</button>
+            <a href="/suppliers/purchases" class="btn btn-secondary" style="width: auto;">Reset</a>
+        </form>
+
+        <a href="/suppliers/purchases/new" class="btn btn-teal" style="width: auto;">
+            <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i>
+            New Purchase Entry
+        </a>
+    </div>
+</div>
+
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Bill / Invoice #</th>
+                <th>Date</th>
+                <th>Supplier</th>
+                <th>Total Billed</th>
+                <th>Amount Paid</th>
+                <th>Balance Due</th>
+                <th style="text-align: right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in purchases %}
+            <tr>
+                <td style="font-weight: 700;">
+                    <a href="/suppliers/purchases/{{ p.id }}" class="link">{{ p.invoice_no }}</a>
+                </td>
+                <td style="color: var(--text-secondary); font-size: 0.85rem;">{{ p.date }}</td>
+                <td style="font-weight: 600; color: var(--primary);">
+                    {{ p.supplier.name }}
+                </td>
+                <td style="font-weight: 700; font-family: var(--font-heading); color: var(--primary);">
+                    Rs. {{ '%.2f'|format(p.total_amount|float) }}
+                </td>
+                <td style="font-weight: 600; font-family: var(--font-heading); color: var(--success);">
+                    Rs. {{ '%.2f'|format(p.amount_paid|float) }}
+                </td>
+                <td style="font-weight: 700; font-family: var(--font-heading);">
+                    {% if p.balance > 0 %}
+                    <span style="color: var(--error);">Rs. {{ '%.2f'|format(p.balance|float) }}</span>
+                    {% else %}
+                    <span style="color: var(--success); font-size: 0.85rem;">Paid in Full</span>
+                    {% endif %}
+                </td>
+                <td style="text-align: right;">
+                    <div style="display: inline-flex; gap: 6px;">
+                        <a href="/suppliers/purchases/{{ p.id }}" class="btn btn-secondary btn-sm" title="View Purchase">
+                            <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
+                        </a>
+                        <a href="/print/purchase/{{ p.id }}" class="btn btn-secondary btn-sm" title="Print Purchase Bill" target="_blank">
+                            <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
+                    <i data-lucide="shopping-bag" style="width: 36px; height: 36px; margin-bottom: 8px; opacity: 0.4;"></i>
+                    <p style="font-size: 0.95rem;">No purchase bills recorded.</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

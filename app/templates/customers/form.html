@@ -1,0 +1,71 @@
+{% extends "dashboard.html" %}
+{% block title %}{% if customer %}Edit Customer: {{ customer.name }}{% else %}Add New Customer{% endif %} — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}{% if customer %}Edit Customer: {{ customer.customer_code }}{% else %}Register New Customer{% endif %}{% endblock %}
+
+{% block content %}
+<div style="max-width: 680px; margin: 0 auto;">
+    <div class="card" style="padding: 28px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-subtle);">
+            <div style="width: 42px; height: 42px; border-radius: var(--radius-md); background: var(--secondary-light); color: var(--secondary); display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="user-plus" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div>
+                <h3 style="font-size: 1.15rem; color: var(--primary); margin: 0; font-weight: 700;">
+                    {% if customer %}Customer Profile & Contact{% else %}New Client Profile{% endif %}
+                </h3>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">Fill in client contact details and ledger configuration</p>
+            </div>
+        </div>
+
+        <form method="POST" action="{% if customer %}/customers/{{ customer.id }}/edit{% else %}/customers/new{% endif %}">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Full Customer / Business Name *</label>
+                    <input name="name" class="form-control" placeholder="e.g. Al-Rehman Builders / Tariq Mehmood" value="{{ customer.name if customer else '' }}" {% if customer and customer.is_walk_in %}readonly{% endif %} required>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone / WhatsApp Number</label>
+                    <input name="phone" class="form-control" placeholder="e.g. 0300-1234567" value="{{ customer.phone if customer and customer.phone else '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Project / Site Reference</label>
+                    <input name="vehicle_info" class="form-control" placeholder="e.g. DHA Phase 6 Villa, Bahria Plaza" value="{{ customer.vehicle_info if customer and customer.vehicle_info else '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Account Status</label>
+                    <select name="status" class="form-control">
+                        <option value="Active" {% if not customer or customer.status == 'Active' %}selected{% endif %}>Active</option>
+                        <option value="Inactive" {% if customer and customer.status == 'Inactive' %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Billing & Delivery Address</label>
+                    <textarea name="address" class="form-control" rows="2" placeholder="Street address, city, site location details...">{{ customer.address if customer and customer.address else '' }}</textarea>
+                </div>
+
+                {% if not customer %}
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Opening Balance (Rs.)</label>
+                    <input name="opening_balance" type="number" step="0.01" class="form-control" value="0.00" placeholder="Positive if they owe money, negative if account credit">
+                    <span style="font-size: 0.76rem; color: var(--text-muted); margin-top: 4px; display: block;">
+                        Positive amount means customer owes you; negative amount means customer has existing advance credit.
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+                <a href="/customers" class="btn btn-secondary" style="width: auto;">Cancel</a>
+                <button type="submit" class="btn btn-teal btn-lg" style="width: auto;">
+                    <i data-lucide="check" style="width: 18px; height: 18px;"></i>
+                    {% if customer %}Update Customer{% else %}Create Customer Account{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

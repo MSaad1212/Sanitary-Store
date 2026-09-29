@@ -1,0 +1,51 @@
+{% extends "dashboard.html" %}
+
+{% block title %}My Profile — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}Account Security & Profile{% endblock %}
+
+{% block content %}
+<div style="max-width: 520px; margin: 0 auto;">
+    <div class="card" style="padding: 28px;">
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-subtle);">
+            <div class="user-avatar" style="width: 48px; height: 48px; font-size: 1.2rem; background: var(--secondary-light); color: var(--secondary); border: 2px solid var(--secondary);">
+                {{ current_user.username[0]|upper }}
+            </div>
+            <div>
+                <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--primary); margin: 0;">{{ current_user.username }}</h3>
+                <span class="badge badge-teal" style="margin-top: 4px;">{{ current_user.role }}</span>
+            </div>
+        </div>
+
+        <form action="/profile" method="POST">
+            <div class="form-group">
+                <label for="current_password">Current Password *</label>
+                <div style="position: relative;">
+                    <input type="password" id="current_password" name="current_password" class="form-control" placeholder="••••••••" required style="padding-left: 36px;">
+                    <i data-lucide="lock" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-muted);"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="new_password">New Password *</label>
+                <div style="position: relative;">
+                    <input type="password" id="new_password" name="new_password" class="form-control" placeholder="••••••••" required style="padding-left: 36px;">
+                    <i data-lucide="key" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-muted);"></i>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label for="confirm_password">Confirm New Password *</label>
+                <div style="position: relative;">
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="••••••••" required style="padding-left: 36px;">
+                    <i data-lucide="shield-check" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-muted);"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-teal btn-lg" style="width: 100%;">
+                <i data-lucide="save" style="width: 18px; height: 18px;"></i>
+                Update Password
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

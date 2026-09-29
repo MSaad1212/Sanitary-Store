@@ -1,0 +1,126 @@
+{% extends "dashboard.html" %}
+{% block title %}{{ supplier.name }} — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}Supplier Profile & Ledger: {{ supplier.name }}{% endblock %}
+
+{% block content %}
+<div class="card" style="padding: 24px; margin-bottom: 28px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+        <div style="display: flex; gap: 16px; align-items: flex-start;">
+            <div style="width: 52px; height: 52px; border-radius: var(--radius-md); background: #E0E7FF; color: #4338CA; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 700; flex-shrink: 0; border: 1px solid rgba(67, 56, 202, 0.2);">
+                {{ supplier.name[0]|upper }}
+            </div>
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <span class="badge badge-navy">{{ supplier.supplier_code }}</span>
+                    {% if supplier.status == "Active" %}
+                        <span class="badge badge-success">Active Supplier</span>
+                    {% else %}
+                        <span class="badge badge-danger">Inactive</span>
+                    {% endif %}
+                </div>
+                <h2 style="font-size: 1.4rem; color: var(--primary); margin: 6px 0 4px; font-weight: 700;">
+                    {{ supplier.name }}
+                </h2>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); display: flex; gap: 12px; flex-wrap: wrap;">
+                    <span>Contact: <strong>{{ supplier.contact_person or '—' }}</strong></span>
+                    <span>·</span>
+                    <span>Phone: <strong>{{ supplier.phone or 'Not Provided' }}</strong></span>
+                    {% if supplier.address %}
+                    <span>·</span>
+                    <span>Address: <strong>{{ supplier.address }}</strong></span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="/suppliers/purchases/new" class="btn btn-teal btn-sm">
+                <i data-lucide="plus-circle" style="width: 15px; height: 15px;"></i> New Purchase
+            </a>
+            <a href="/print/supplier-ledger/{{ supplier.id }}" class="btn btn-secondary btn-sm" target="_blank">
+                <i data-lucide="printer" style="width: 15px; height: 15px;"></i> Statement
+            </a>
+            <a href="/suppliers/{{ supplier.id }}/edit" class="btn btn-secondary btn-sm">
+                <i data-lucide="edit-2" style="width: 15px; height: 15px;"></i> Edit
+            </a>
+            <a href="/suppliers/payments/new" class="btn btn-secondary btn-sm">
+                <i data-lucide="credit-card" style="width: 15px; height: 15px;"></i> Pay Supplier
+            </a>
+            <form action="/suppliers/{{ supplier.id }}/delete" method="POST" style="display:inline;" onsubmit="confirmDelete(event, this, 'supplier')">
+                <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--error);" title="Delete">
+                    <i data-lucide="trash-2" style="width: 15px; height: 15px;"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Balance Status Banner -->
+    <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; color: var(--text-muted);">Current Supplier Ledger Balance</span>
+            <div style="font-family: var(--font-heading); font-size: 1.6rem; font-weight: 700; margin-top: 2px;">
+                {% if supplier.current_balance > 0 %}
+                    <span style="color: var(--error);">Payable Owed: Rs. {{ '%.2f'|format(supplier.current_balance|float) }}</span>
+                {% elif supplier.current_balance < 0 %}
+                    <span style="color: var(--success);">Advance Paid: Rs. {{ '%.2f'|format(supplier.current_balance|abs|float) }}</span>
+                {% else %}
+                    <span style="color: var(--text-muted);">Account Settled (Rs. 0.00)</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <a href="/suppliers" class="btn btn-secondary btn-sm">&larr; Back to Suppliers</a>
+        </div>
+    </div>
+</div>
+
+<!-- Ledger Transactions Table -->
+<div class="card" style="padding: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+            <h3 class="card-title">Purchases & Payment Transactions</h3>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">Purchases billed, supplier payments, debit notes, and returns</p>
+        </div>
+        <span class="badge badge-navy">{{ ledger|length }} Entries</span>
+    </div>
+
+    <div class="table-container" style="margin-top: 0; box-shadow: none;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description / Reference</th>
+                    <th>Debit (Bill)</th>
+                    <th>Credit (Paid)</th>
+                    <th style="text-align: right;">Cumulative Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in ledger %}
+                <tr>
+                    <td style="font-weight: 600; color: var(--text-secondary); font-size: 0.85rem;">{{ e.date }}</td>
+                    <td style="font-weight: 500; color: var(--primary);">{{ e.description }}</td>
+                    <td style="color: var(--error); font-family: var(--font-heading); font-weight: 600;">
+                        {% if e.debit and e.debit > 0 %}Rs. {{ '%.2f'|format(e.debit|float) }}{% else %}—{% endif %}
+                    </td>
+                    <td style="color: var(--success); font-family: var(--font-heading); font-weight: 600;">
+                        {% if e.credit and e.credit > 0 %}Rs. {{ '%.2f'|format(e.credit|float) }}{% else %}—{% endif %}
+                    </td>
+                    <td style="text-align: right; font-weight: 700; font-family: var(--font-heading); color: {% if e.balance > 0 %}var(--error){% elif e.balance < 0 %}var(--success){% else %}var(--primary){% endif %};">
+                        Rs. {{ '%.2f'|format(e.balance|float) }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px 0; color: var(--text-muted);">
+                        <i data-lucide="truck" style="width: 32px; height: 32px; margin-bottom: 8px; opacity: 0.4;"></i>
+                        <br>No ledger transactions recorded yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

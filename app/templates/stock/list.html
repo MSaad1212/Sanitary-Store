@@ -1,0 +1,166 @@
+{% extends "dashboard.html" %}
+{% block title %}Products & Inventory — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}Products & Inventory Catalog{% endblock %}
+
+{% block content %}
+<div class="card" style="padding: 20px; margin-bottom: 24px;">
+    <div class="toolbar" style="margin-bottom: 0;">
+        <form method="GET" action="/stock" class="filter-bar" style="flex: 1;">
+            <div style="position: relative; min-width: 260px;">
+                <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-muted);"></i>
+                <input type="text" name="q" class="form-control" placeholder="Search code, brand, model..." value="{{ filters.q }}" style="padding-left: 38px;">
+            </div>
+
+            <select name="category" class="form-control" style="max-width: 200px;">
+                <option value="">All Categories</option>
+                {% for c in categories %}
+                <option value="{{ c }}" {% if filters.category == c %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="brand" class="form-control" style="max-width: 170px;">
+                <option value="">All Brands</option>
+                {% for b in brands %}
+                <option value="{{ b }}" {% if filters.brand == b %}selected{% endif %}>{{ b }}</option>
+                {% endfor %}
+            </select>
+
+            <label class="form-row-checkbox" style="background: var(--bg-subtle); padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <input type="checkbox" name="low_stock" value="1" {% if filters.low_stock %}checked{% endif %}>
+                <span style="font-size: 0.82rem; font-weight: 600; color: var(--error);">Low Stock Only</span>
+            </label>
+
+            <button type="submit" class="btn btn-primary" style="width: auto;">Filter</button>
+            <a href="/stock" class="btn btn-secondary" style="width: auto;">Reset</a>
+        </form>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="/stock/low" class="btn btn-secondary" style="width: auto;">
+                <i data-lucide="alert-triangle" style="width: 16px; height: 16px; color: var(--warning);"></i>
+                Low Stock Report
+            </a>
+            <a href="/stock/new" class="btn btn-teal" style="width: auto;">
+                <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i>
+                Add New Product
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Product / Details</th>
+                <th>Category</th>
+                <th>Purchase Cost</th>
+                <th>Sale Price</th>
+                <th>Stock Availability</th>
+                <th>Reorder Level</th>
+                <th>Status</th>
+                <th style="text-align: right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 38px; height: 38px; border-radius: var(--radius-md); background: var(--bg-subtle); display: flex; align-items: center; justify-content: center; color: var(--secondary); flex-shrink: 0; border: 1px solid var(--border-color);">
+                            {% if 'Basin' in item.category or 'Sink' in item.category %}
+                                <i data-lucide="droplet" style="width: 18px; height: 18px;"></i>
+                            {% elif 'Toilet' in item.category %}
+                                <i data-lucide="box" style="width: 18px; height: 18px;"></i>
+                            {% elif 'Tap' in item.category %}
+                                <i data-lucide="wrench" style="width: 18px; height: 18px;"></i>
+                            {% elif 'Shower' in item.category %}
+                                <i data-lucide="shower-head" style="width: 18px; height: 18px;"></i>
+                            {% else %}
+                                <i data-lucide="package" style="width: 18px; height: 18px;"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; color: var(--primary);">
+                                <a href="/stock/{{ item.id }}" class="link">{{ item.name or item.brand }}</a>
+                            </div>
+                            <div style="font-size: 0.76rem; color: var(--text-muted); display: flex; gap: 8px;">
+                                <span style="font-weight: 600; color: var(--text-secondary);">{{ item.item_code }}</span>
+                                <span>·</span>
+                                <span>{{ item.brand }}</span>
+                                {% if item.barcode %}
+                                <span>·</span>
+                                <span>UPC: {{ item.barcode }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <span class="badge badge-teal">{{ item.category }}</span>
+                    {% if item.description %}
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">{{ item.description }}</div>
+                    {% endif %}
+                </td>
+
+                <td style="font-family: var(--font-heading); font-size: 0.92rem; color: var(--text-secondary);">
+                    Rs. {{ '%.2f'|format(item.purchase_price|float) }}
+                </td>
+
+                <td style="font-family: var(--font-heading); font-size: 1rem; font-weight: 700; color: var(--primary);">
+                    Rs. {{ '%.2f'|format(item.sale_price|float) }}
+                </td>
+
+                <td>
+                    {% if item.current_stock <= 0 %}
+                    <span class="badge badge-danger">Out of Stock (0)</span>
+                    {% elif item.current_stock <= item.reorder_level %}
+                    <span class="badge badge-warning">Low: {{ item.current_stock }} {{ item.unit }}</span>
+                    {% else %}
+                    <span class="badge badge-success">{{ item.current_stock }} {{ item.unit }}</span>
+                    {% endif %}
+                </td>
+
+                <td style="color: var(--text-muted); font-size: 0.85rem;">
+                    {{ item.reorder_level }} {{ item.unit }}
+                </td>
+
+                <td>
+                    {% if item.status == 'Active' %}
+                    <span class="badge badge-success">Active</span>
+                    {% else %}
+                    <span class="badge badge-danger">{{ item.status }}</span>
+                    {% endif %}
+                </td>
+
+                <td style="text-align: right;">
+                    <div style="display: inline-flex; gap: 6px;">
+                        <a href="/stock/{{ item.id }}" class="btn btn-secondary btn-sm" title="View History & Movements">
+                            <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
+                        </a>
+                        <a href="/stock/{{ item.id }}/edit" class="btn btn-secondary btn-sm" title="Edit Product">
+                            <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                        </a>
+                        <form action="/stock/{{ item.id }}/delete" method="POST" style="display:inline;" onsubmit="confirmDelete(event, this, 'product')">
+                            <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--error);" title="Delete">
+                                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
+                    <i data-lucide="package" style="width: 36px; height: 36px; margin-bottom: 8px; opacity: 0.4;"></i>
+                    <p style="font-size: 0.95rem;">No products match the selected criteria.</p>
+                    <a href="/stock/new" class="btn btn-teal btn-sm" style="margin-top: 12px; width: auto; display: inline-flex;">
+                        Add First Product
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

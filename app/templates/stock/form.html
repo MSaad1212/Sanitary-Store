@@ -1,0 +1,163 @@
+{% extends "dashboard.html" %}
+{% block title %}{% if item %}Edit Product {{ item.item_code }}{% else %}Add New Product{% endif %} — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}{% if item %}Edit Product: {{ item.name or item.item_code }}{% else %}Add New Sanitary Product{% endif %}{% endblock %}
+
+{% block content %}
+<div style="max-width: 860px; margin: 0 auto;">
+    <form method="POST" enctype="multipart/form-data" action="{% if item %}/stock/{{ item.id }}/edit{% else %}/stock/new{% endif %}">
+        <!-- Section 1: Product Identification -->
+        <div class="card" style="padding: 24px; margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
+                <div style="width: 32px; height: 32px; border-radius: var(--radius-sm); background: var(--secondary-light); color: var(--secondary); display: flex; align-items: center; justify-content: center;">
+                    <i data-lucide="tag" style="width: 18px; height: 18px;"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.05rem; color: var(--primary); margin: 0; font-weight: 700;">General Information</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">Basic product details, category, and manufacturer brand</p>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Manufacturer / Brand *</label>
+                    <input name="brand" class="form-control" placeholder="e.g. Master, Sonex, Grohe, Faisal" value="{{ item.brand if item else '' }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Product Name / Model *</label>
+                    <input name="name" class="form-control" placeholder="e.g. Wall-Hung Commode Classic" value="{{ item.name if item and item.name else '' }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Product Category *</label>
+                    <select name="category" class="form-control" required>
+                        <option value="">Select category...</option>
+                        {% for c in categories %}
+                        <option value="{{ c }}" {% if item and item.category == c %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Material / Finish Type</label>
+                    <select name="description" class="form-control">
+                        <option value="">Select material / finish...</option>
+                        {% for t in types %}
+                        <option value="{{ t }}" {% if item and item.description == t %}selected{% endif %}>{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Barcode / UPC / Catalog Number</label>
+                    <div style="position: relative;">
+                        <input name="barcode" class="form-control" placeholder="e.g. 892019283019" value="{{ item.barcode if item and item.barcode else '' }}" style="padding-left: 38px;">
+                        <i data-lucide="scan-barcode" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-muted);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Pricing & Valuation -->
+        <div class="card" style="padding: 24px; margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
+                <div style="width: 32px; height: 32px; border-radius: var(--radius-sm); background: var(--accent-light); color: var(--accent); display: flex; align-items: center; justify-content: center;">
+                    <i data-lucide="dollar-sign" style="width: 18px; height: 18px;"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.05rem; color: var(--primary); margin: 0; font-weight: 700;">Pricing & Commercial Margin</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">Cost of purchase and retail selling price</p>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Purchase Price / Cost (Rs.) *</label>
+                    <input name="purchase_price" id="input-purchase-price" type="number" step="0.01" class="form-control" placeholder="0.00" value="{{ item.purchase_price if item else '0.00' }}" required oninput="calcMargin()">
+                </div>
+
+                <div class="form-group">
+                    <label>Retail Sale Price (Rs.) *</label>
+                    <input name="sale_price" id="input-sale-price" type="number" step="0.01" class="form-control" placeholder="0.00" value="{{ item.sale_price if item else '0.00' }}" required oninput="calcMargin()">
+                </div>
+            </div>
+
+            <div id="price-margin-hint" style="background: var(--bg-subtle); padding: 10px 14px; border-radius: var(--radius-md); font-size: 0.84rem; color: var(--text-secondary); border: 1px solid var(--border-color);">
+                Estimated Gross Profit: <strong id="margin-amount" style="color: var(--secondary);">Rs. 0.00</strong> (<span id="margin-pct">0%</span>)
+            </div>
+        </div>
+
+        <!-- Section 3: Inventory Settings -->
+        <div class="card" style="padding: 24px; margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
+                <div style="width: 32px; height: 32px; border-radius: var(--radius-sm); background: #E0E7FF; color: #4338CA; display: flex; align-items: center; justify-content: center;">
+                    <i data-lucide="package" style="width: 18px; height: 18px;"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.05rem; color: var(--primary); margin: 0; font-weight: 700;">Inventory Controls</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">Stock unit, reorder notification threshold, and catalog status</p>
+                </div>
+            </div>
+
+            <div class="form-grid-3">
+                <div class="form-group">
+                    <label>Unit of Measure</label>
+                    <select name="unit" class="form-control">
+                        <option value="Piece" {% if item and item.unit == 'Piece' %}selected{% endif %}>Piece</option>
+                        <option value="Set" {% if item and item.unit == 'Set' %}selected{% endif %}>Set</option>
+                        <option value="Box" {% if item and item.unit == 'Box' %}selected{% endif %}>Box</option>
+                        <option value="Meter" {% if item and item.unit == 'Meter' %}selected{% endif %}>Meter / Length</option>
+                        <option value="Feet" {% if item and item.unit == 'Feet' %}selected{% endif %}>Feet</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Low Stock Reorder Limit</label>
+                    <input name="reorder_level" type="number" class="form-control" value="{{ item.reorder_level if item else 5 }}" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label>Catalog Status</label>
+                    <select name="status" class="form-control">
+                        <option value="Active" {% if not item or item.status == 'Active' %}selected{% endif %}>Active</option>
+                        <option value="Discontinued" {% if item and item.status == 'Discontinued' %}selected{% endif %}>Discontinued</option>
+                    </select>
+                </div>
+            </div>
+
+            {% if item %}
+            <div style="background: #F8FAFC; border-left: 3px solid var(--secondary); padding: 12px 16px; border-radius: 4px; font-size: 0.84rem; color: var(--text-secondary); margin-top: 8px;">
+                <i data-lucide="info" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 4px; color: var(--secondary);"></i>
+                Current stock is <strong>{{ item.current_stock }} {{ item.unit }}</strong>. Stock levels adjust automatically via purchases, sales, customer returns, or manual stock reconciliation.
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Form Actions -->
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <a href="/stock" class="btn btn-secondary" style="width: auto;">Cancel</a>
+            <button type="submit" class="btn btn-teal btn-lg" style="width: auto;">
+                <i data-lucide="save" style="width: 18px; height: 18px;"></i>
+                {% if item %}Update Product{% else %}Save & Add to Catalog{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function calcMargin() {
+        const purchase = parseFloat(document.getElementById('input-purchase-price').value) || 0;
+        const sale = parseFloat(document.getElementById('input-sale-price').value) || 0;
+        const profit = sale - purchase;
+        const pct = purchase > 0 ? ((profit / purchase) * 100).toFixed(1) : 0;
+
+        document.getElementById('margin-amount').textContent = `Rs. ${profit.toFixed(2)}`;
+        document.getElementById('margin-pct').textContent = `${pct}% markup`;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        calcMargin();
+        lucide.createIcons();
+    });
+</script>
+{% endblock %}

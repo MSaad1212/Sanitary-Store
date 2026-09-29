@@ -1,0 +1,51 @@
+{% extends "dashboard.html" %}
+{% block title %}Adjust Stock — {{ item.item_code }} — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}Manual Stock Reconciliation: {{ item.name or item.item_code }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 520px; margin: 0 auto;">
+    <div class="card" style="padding: 28px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border-subtle);">
+            <div style="width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--secondary-light); color: var(--secondary); display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="sliders" style="width: 20px; height: 20px;"></i>
+            </div>
+            <div>
+                <h3 style="font-size: 1.15rem; color: var(--primary); margin: 0; font-weight: 700;">Reconcile Stock</h3>
+                <span style="font-size: 0.8rem; color: var(--text-secondary);">Item: <strong>{{ item.item_code }}</strong> · {{ item.brand }}</span>
+            </div>
+        </div>
+
+        <div style="background: var(--bg-subtle); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 20px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.88rem; color: var(--text-secondary);">Current Recorded Stock:</span>
+            <span style="font-family: var(--font-heading); font-size: 1.3rem; font-weight: 700; color: var(--primary);">
+                {{ item.current_stock }} {{ item.unit }}
+            </span>
+        </div>
+
+        <form method="POST" action="/stock/{{ item.id }}/adjust">
+            <div class="form-group">
+                <label>Stock Adjustment Quantity *</label>
+                <div style="position: relative;">
+                    <input type="number" name="quantity_change" id="adj-qty" class="form-control" required placeholder="e.g. +5 or -2" style="font-size: 1.05rem; font-weight: 700; color: var(--primary);">
+                </div>
+                <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 4px;">
+                    Use positive numbers (e.g. 5) to add inventory, negative (e.g. -3) for damage or loss.
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label>Reconciliation Reason / Justification *</label>
+                <textarea name="reason" class="form-control" rows="3" required placeholder="Physical stock count discrepancy, showroom demo sample, damaged packaging, supplier excess..."></textarea>
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <a href="/stock/{{ item.id }}" class="btn btn-secondary" style="width: auto;">Cancel</a>
+                <button type="submit" class="btn btn-teal btn-lg" style="width: auto;">
+                    <i data-lucide="check" style="width: 18px; height: 18px;"></i>
+                    Apply Stock Adjustment
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

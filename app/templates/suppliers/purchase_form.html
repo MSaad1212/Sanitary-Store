@@ -1,0 +1,173 @@
+{% extends "dashboard.html" %}
+{% block title %}New Purchase Bill — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}New Supplier Purchase Entry{% endblock %}
+
+{% block content %}
+<div class="card" style="padding: 28px; max-width: 900px; margin: 0 auto;">
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-subtle);">
+        <div style="width: 42px; height: 42px; border-radius: var(--radius-md); background: #E0E7FF; color: #4338CA; display: flex; align-items: center; justify-content: center;">
+            <i data-lucide="shopping-bag" style="width: 22px; height: 22px;"></i>
+        </div>
+        <div>
+            <h3 style="font-size: 1.15rem; color: var(--primary); margin: 0; font-weight: 700;">Record Inbound Inventory & Bill</h3>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">Increases warehouse stock and updates supplier ledger</p>
+        </div>
+    </div>
+
+    <form method="POST" action="/suppliers/purchases/new" id="purchase-form">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Supplier / Manufacturer *</label>
+                <select name="supplier_id" class="form-control" required>
+                    <option value="">Select a supplier...</option>
+                    {% for s in suppliers %}
+                    <option value="{{ s.id }}">{{ s.name }} ({{ s.supplier_code }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Invoice / Bill Date *</label>
+                <input type="date" name="date" class="form-control" value="{{ today }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Amount Paid to Supplier Now (Rs.)</label>
+                <input type="number" step="0.01" name="amount_paid" id="input-amount-paid" class="form-control" value="0.00" oninput="calculatePurchaseTotals()">
+            </div>
+
+            <div class="form-group">
+                <label>Payment Method</label>
+                <select name="payment_method" class="form-control">
+                    {% for m in payment_methods %}
+                    <option value="{{ m }}">{{ m }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label>Supplier Bill # / Delivery Note</label>
+                <input name="note" class="form-control" placeholder="e.g. Master Bill #4091, Goods transport receipt...">
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin: 24px 0 12px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+            <div>
+                <h4 style="margin: 0; color: var(--primary); font-size: 1.05rem;">Stock Items Received</h4>
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0;">Select products, quantities, and cost prices</p>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">Total Bill: <strong id="purchase-total-display" style="font-size: 1.15rem; color: var(--primary); font-family: var(--font-heading);">Rs. 0.00</strong></div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Remaining Due: <strong id="purchase-balance-display" style="color: var(--error);">Rs. 0.00</strong></div>
+            </div>
+        </div>
+
+        <div class="table-container" style="margin-top: 0;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 45%;">Sanitary Product</th>
+                        <th style="width: 20%;">Quantity Received</th>
+                        <th style="width: 25%;">Unit Purchase Cost (Rs.)</th>
+                        <th style="width: 10%;"></th>
+                    </tr>
+                </thead>
+                <tbody id="purchase-lines-body">
+                    <tr class="purchase-line-row">
+                        <td>
+                            <select name="item_id" class="form-control item-select" required style="font-size: 0.88rem;" onchange="onItemSelectChange(this)">
+                                <option value="">Select product...</option>
+                                {% for i in items %}
+                                <option value="{{ i.id }}" data-price="{{ i.purchase_price }}">{{ i.item_code }} — {{ i.name or i.brand }} ({{ i.brand }})</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" name="quantity" class="form-control qty-input" min="1" value="1" required oninput="calculatePurchaseTotals()">
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" name="unit_price" class="form-control price-input" value="0.00" required oninput="calculatePurchaseTotals()">
+                        </td>
+                        <td style="text-align: center;">
+                            <button type="button" class="btn btn-secondary btn-sm remove-line" style="color: var(--error);" onclick="removePurchaseRow(this)">
+                                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <button type="button" id="add-purchase-line-btn" class="btn btn-secondary btn-sm" style="margin-top: 12px;" onclick="addPurchaseRow()">
+            <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Add Another Product Line
+        </button>
+
+        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+            <a href="/suppliers/purchases" class="btn btn-secondary" style="width: auto;">Cancel</a>
+            <button type="submit" class="btn btn-teal btn-lg" style="width: auto;">
+                <i data-lucide="check" style="width: 18px; height: 18px;"></i>
+                Save & Update Inventory
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function onItemSelectChange(selectEl) {
+        const opt = selectEl.selectedOptions[0];
+        if (opt && opt.value) {
+            const price = opt.getAttribute('data-price') || 0;
+            const row = selectEl.closest('tr');
+            row.querySelector('.price-input').value = parseFloat(price).toFixed(2);
+            calculatePurchaseTotals();
+        }
+    }
+
+    function addPurchaseRow() {
+        const body = document.getElementById('purchase-lines-body');
+        const firstRow = body.querySelector('.purchase-line-row');
+        const newRow = firstRow.cloneNode(true);
+        newRow.querySelector('select').selectedIndex = 0;
+        newRow.querySelector('.qty-input').value = 1;
+        newRow.querySelector('.price-input').value = '0.00';
+        body.appendChild(newRow);
+        lucide.createIcons();
+        calculatePurchaseTotals();
+    }
+
+    function removePurchaseRow(btn) {
+        const rows = document.querySelectorAll('.purchase-line-row');
+        if (rows.length > 1) {
+            btn.closest('tr').remove();
+            calculatePurchaseTotals();
+        } else {
+            Swal.fire({
+                title: 'Item Required',
+                text: 'At least one line item is required.',
+                icon: 'info',
+                confirmButtonColor: '#12304A'
+            });
+        }
+    }
+
+    function calculatePurchaseTotals() {
+        let total = 0;
+        document.querySelectorAll('.purchase-line-row').forEach(row => {
+            const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+            const price = parseFloat(row.querySelector('.price-input').value) || 0;
+            total += (qty * price);
+        });
+
+        const paid = parseFloat(document.getElementById('input-amount-paid').value) || 0;
+        const balance = total - paid;
+
+        document.getElementById('purchase-total-display').textContent = `Rs. ${total.toFixed(2)}`;
+        document.getElementById('purchase-balance-display').textContent = `Rs. ${balance.toFixed(2)}`;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        calculatePurchaseTotals();
+        lucide.createIcons();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends "dashboard.html" %}
+{% block title %}Invoice {{ sale.invoice_no }} — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}Invoice Details: {{ sale.invoice_no }}{% endblock %}
+
+{% block content %}
+<div class="card" style="padding: 24px; margin-bottom: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <span class="badge badge-navy" style="font-size: 0.85rem; font-weight: 700;">{{ sale.invoice_no }}</span>
+                <span class="badge {% if sale.balance == 0 %}badge-success{% else %}badge-danger{% endif %}">
+                    {% if sale.balance == 0 %}Fully Paid{% else %}Balance Due{% endif %}
+                </span>
+                <span class="badge badge-teal">{{ sale.payment_method or 'Cash' }}</span>
+            </div>
+
+            <h2 style="font-size: 1.35rem; color: var(--primary); margin: 8px 0 4px; font-weight: 700;">
+                Customer: {{ sale.customer.name }}
+            </h2>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); display: flex; gap: 14px; flex-wrap: wrap;">
+                <span>Date: <strong>{{ sale.date }}</strong></span>
+                <span>·</span>
+                <span>Code: <strong>{{ sale.customer.customer_code }}</strong></span>
+                {% if sale.customer.phone %}
+                <span>·</span>
+                <span>Phone: <strong>{{ sale.customer.phone }}</strong></span>
+                {% endif %}
+                {% if sale.note %}
+                <span>·</span>
+                <span>Note: <strong>{{ sale.note }}</strong></span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Action Print & Share Buttons -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="/customers/sales" class="btn btn-secondary btn-sm">&larr; Invoices List</a>
+            
+            <a href="/print/sale-pos/{{ sale.id }}" class="btn btn-secondary btn-sm" target="_blank" onclick="window.open(this.href, 'pos', 'width=420,height=620'); return false;">
+                <i data-lucide="receipt" style="width: 15px; height: 15px;"></i> Thermal POS
+            </a>
+
+            {% set phone = sale.customer.phone|default('', true)|replace(' ', '')|replace('-', '') %}
+            {% if phone.startswith('0') %}
+                {% set wa_phone = '92' ~ phone[1:] %}
+            {% else %}
+                {% set wa_phone = phone %}
+            {% endif %}
+            {% set wa_msg = "Assalam-o-Alaikum " ~ sale.customer.name ~ ", your invoice #" ~ sale.invoice_no ~ " for Rs. " ~ sale.total_amount ~ " from Arshaf Sanitary Store is ready." %}
+            <a href="https://wa.me/{{ wa_phone }}?text={{ wa_msg }}" target="_blank" class="btn btn-secondary btn-sm" style="color: #16A34A; border-color: #BBF7D0;">
+                <i data-lucide="message-circle" style="width: 15px; height: 15px;"></i> WhatsApp
+            </a>
+
+            <a href="/print/sale/{{ sale.id }}?download=1" class="btn btn-secondary btn-sm">
+                <i data-lucide="download" style="width: 15px; height: 15px;"></i> PDF
+            </a>
+
+            <a href="/print/sale/{{ sale.id }}" class="btn btn-teal btn-sm" target="_blank">
+                <i data-lucide="printer" style="width: 15px; height: 15px;"></i> Print A4 Invoice
+            </a>
+        </div>
+    </div>
+
+    <!-- Financial KPI Totals Row -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle);">
+        <div style="background: var(--bg-subtle); padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Total Invoice Value</div>
+            <div style="font-size: 1.4rem; font-weight: 700; color: var(--primary); font-family: var(--font-heading);">
+                Rs. {{ '%.2f'|format(sale.total_amount|float) }}
+            </div>
+        </div>
+
+        <div style="background: var(--bg-subtle); padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Amount Received</div>
+            <div style="font-size: 1.4rem; font-weight: 700; color: var(--success); font-family: var(--font-heading);">
+                Rs. {{ '%.2f'|format(sale.amount_received|float) }}
+            </div>
+        </div>
+
+        {% set advance_adjusted = sale.total_amount - sale.amount_received - sale.balance %}
+        <div style="background: var(--bg-subtle); padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Advance Credit Adjusted</div>
+            <div style="font-size: 1.4rem; font-weight: 700; color: var(--secondary); font-family: var(--font-heading);">
+                Rs. {{ '%.2f'|format(advance_adjusted|float) }}
+            </div>
+        </div>
+
+        <div style="background: var(--bg-subtle); padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Remaining Balance</div>
+            <div style="font-size: 1.4rem; font-weight: 700; color: {% if sale.balance > 0 %}var(--error){% else %}var(--success){% endif %}; font-family: var(--font-heading);">
+                Rs. {{ '%.2f'|format(sale.balance|float) }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Items List -->
+<div class="card" style="padding: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 class="card-title">Order Line Items</h3>
+        <span class="badge badge-navy">{{ sale.items|length }} Item(s)</span>
+    </div>
+
+    <div class="table-container" style="margin-top: 0; box-shadow: none;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Item Description</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th style="text-align: right;">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in sale.items %}
+                <tr>
+                    <td>
+                        <div style="font-weight: 600; color: var(--primary);">
+                            {{ line.item.name or line.item.brand }}
+                        </div>
+                        <div style="font-size: 0.76rem; color: var(--text-muted);">
+                            Code: {{ line.item.item_code }} · Brand: {{ line.item.brand }}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge badge-teal">{{ line.item.category }}</span>
+                    </td>
+                    <td style="font-weight: 600;">
+                        {{ line.quantity }} {{ line.item.unit }}
+                    </td>
+                    <td style="font-family: var(--font-heading); color: var(--text-secondary);">
+                        Rs. {{ '%.2f'|format(line.unit_price|float) }}
+                    </td>
+                    <td style="text-align: right; font-weight: 700; font-family: var(--font-heading); color: var(--primary);">
+                        Rs. {{ '%.2f'|format(line.subtotal|float) }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr style="background: var(--bg-subtle); font-size: 1rem;">
+                    <td colspan="4" style="text-align: right; font-weight: 700; color: var(--primary);">
+                        Invoice Total:
+                    </td>
+                    <td style="text-align: right; font-weight: 800; font-family: var(--font-heading); color: var(--secondary); font-size: 1.15rem;">
+                        Rs. {{ '%.2f'|format(sale.total_amount|float) }}
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+{% endblock %}

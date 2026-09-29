@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ kind }} Receipt - {{ return_no }}</title>
+    <link rel="icon" href="/static/img/logo.png" type="image/jpeg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4;
+            margin: 16mm 18mm 20mm;
+            @bottom-center {
+                content: "Page " counter(page) " of " counter(pages);
+                font-family: 'Inter', sans-serif;
+                font-size: 8pt;
+                color: #94a3b8;
+            }
+        }
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            font-size: 10pt;
+            color: #1e293b;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            width: 174mm;
+        }
+        table.items thead { display: table-header-group; }
+        table.items tr { break-inside: avoid; page-break-inside: avoid; }
+        .header, .party-panel { break-after: avoid; page-break-after: avoid; }
+        .summary-block { break-inside: avoid; page-break-inside: avoid; }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 18px;
+            margin-bottom: 8px;
+            border-bottom: 3px solid #12304A;
+        }
+        .shop-info { display: flex; align-items: center; gap: 14px; }
+        .logo-mark {
+            width: 44px; height: 44px; border-radius: 10px;
+            background: linear-gradient(135deg, #12304A, #0F9D94);
+            border: 1.5px solid #C6A76A;
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 16pt; letter-spacing: -0.5px; flex-shrink: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+        .shop-info h1 { font-family: 'Outfit', sans-serif; font-size: 19pt; font-weight: 800; margin: 0 0 2px; color: #12304A; letter-spacing: -0.5px; }
+        .shop-info .sub { color: #64748b; font-size: 9pt; }
+        .document-title { text-align: right; padding-top: 2px; }
+        .document-title h2 { font-family: 'Outfit', sans-serif; font-size: 16pt; font-weight: 700; color: #DC2626; margin: 0 0 4px; text-transform: uppercase; letter-spacing: 1px; }
+        .document-title .meta { color: #64748b; font-size: 9pt; }
+        .document-title .doc-id { color: #12304A; font-size: 9.5pt; font-weight: 700; margin-top: 3px; }
+        
+        .party-panel {
+            display: flex; justify-content: space-between; background: #f8fafc;
+            border: 1px solid #e2e8f0; border-left: 4px solid #DC2626;
+            border-radius: 8px; padding: 14px 18px; margin: 20px 0 24px;
+        }
+        .party-info .eyebrow, .balance-preview .eyebrow {
+            color: #94a3b8; font-size: 8pt; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; margin: 0 0 5px;
+        }
+        .party-name { font-size: 13pt; font-weight: 700; color: #12304A; margin: 0 0 3px; }
+        .party-info .sub-line { color: #64748b; font-size: 9pt; margin: 0; }
+        .balance-preview { text-align: right; }
+        .balance-preview .amount { font-size: 15pt; font-weight: 800; color: #DC2626; font-family: 'Outfit', sans-serif; }
+        
+        table.items { width: 100%; border-collapse: collapse; margin-top: 4px; }
+        table.items th {
+            background-color: #12304A; color: #ffffff; font-weight: 600; font-size: 8.5pt;
+            text-transform: uppercase; letter-spacing: 0.6px; text-align: left; padding: 10px 12px;
+        }
+        table.items th.right { text-align: right; }
+        table.items th.center { text-align: center; }
+        table.items td { padding: 9px 12px; border-bottom: 1px solid #eef1f5; font-size: 9pt; vertical-align: middle; }
+        table.items tbody tr:nth-child(even) { background-color: #fafbfc; }
+        table.items tbody tr:last-child td { border-bottom: 2px solid #cbd5e1; }
+        .right { text-align: right !important; }
+        .center { text-align: center !important; }
+        .amt-debit { color: #dc2626; font-weight: 600; }
+        .amt-credit { color: #16a34a; font-weight: 600; }
+        .amt-balance { font-weight: 700; color: #12304A; }
+        .empty-state { padding: 36px 20px; color: #94a3b8; font-style: italic; text-align: center; font-size: 9pt; }
+        
+        .summary-block { margin-top: 24px; display: flex; justify-content: flex-end; }
+        .summary-card {
+            min-width: 280px; background: #12304A; border-radius: 8px; padding: 14px 20px;
+            display: flex; justify-content: space-between; align-items: center; gap: 20px;
+        }
+        .summary-card .balance-label { color: #cbd5e1; font-weight: 600; text-transform: uppercase; font-size: 8.5pt; letter-spacing: 0.6px; }
+        .summary-card .balance-value { font-size: 14pt; font-weight: 800; color: #ffffff; font-family: 'Outfit', sans-serif; }
+        .footer-note { margin-top: 32px; padding-top: 14px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 8pt; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="shop-info">
+            <div class="logo-mark">A</div>
+            <div>
+                <h1>{{ shop_name }}</h1>
+                <div class="sub">{{ shop_tagline }}</div>
+            </div>
+        </div>
+        <div class="document-title">
+            <h2>{{ kind }}</h2>
+            <div class="meta">Date: {{ ret.date.strftime('%d-%b-%Y') if ret.date else '' }}</div>
+            <div class="doc-id">Return #: {{ return_no }}</div>
+        </div>
+    </div>
+
+    <div class="party-panel">
+        <div class="party-info">
+            <p class="eyebrow">{{ party_label }} Details</p>
+            <p class="party-name">{{ party.name if party else 'N/A' }}</p>
+            <p class="sub-line">Refund Method: {{ ret.refund_method or 'Cash' }}</p>
+        </div>
+        <div class="balance-preview">
+            <p class="eyebrow">Total Refund</p>
+            <div class="amount">Rs. {{ '%.2f'|format(ret.total_amount|float) }}</div>
+        </div>
+    </div>
+
+    <table class="items">
+        <thead>
+            <tr>
+                <th style="width: 45%;">Sanitary Item</th>
+                <th class="center" style="width: 10%;">Qty</th>
+                <th class="right" style="width: 15%;">Unit Rate</th>
+                <th class="right" style="width: 15%;">Subtotal</th>
+                <th style="width: 15%;">Reason</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for line in ret.items %}
+            <tr>
+                <td>
+                    <span style="font-weight: 600; color: #12304A;">{{ (line.item.name or line.item.item_code) if line.item else line.item_id }}</span>
+                    {% if line.item %}
+                    <div style="color: #64748b; font-size: 8pt; margin-top: 2px;">
+                        Code: {{ line.item.item_code }}{% if line.item.brand %} &bull; {{ line.item.brand }}{% endif %}
+                    </div>
+                    {% endif %}
+                </td>
+                <td class="center">{{ line.quantity }}</td>
+                <td class="right">Rs. {{ '%.2f'|format(line.unit_price|float) }}</td>
+                <td class="right amt-balance">Rs. {{ '%.2f'|format(line.subtotal|float) }}</td>
+                <td style="color: #64748b; font-size: 8.5pt;">{{ line.reason or '—' }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="empty-state">No items found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="summary-block">
+        <div class="summary-card">
+            <span class="balance-label">Total Refund</span>
+            <span class="balance-value">Rs. {{ '%.2f'|format(ret.total_amount|float) }}</span>
+        </div>
+    </div>
+
+    <div class="footer-note">{{ shop_name }} &middot; Authorized Sanitary & Bathware Distributor &middot; Computer Generated Return Voucher</div>
+
+</body>
+</html>

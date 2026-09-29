@@ -1,0 +1,104 @@
+{% extends "dashboard.html" %}
+{% block title %}Sales Invoices — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}Customer Sales Invoices{% endblock %}
+
+{% block content %}
+<div class="card" style="padding: 20px; margin-bottom: 24px;">
+    <div class="toolbar" style="margin-bottom: 0;">
+        <form method="GET" class="filter-bar" style="flex: 1;">
+            <div style="position: relative; min-width: 150px;">
+                <input type="text" name="invoice_no" class="form-control" placeholder="Invoice #..." value="{{ filters.invoice_no }}">
+            </div>
+
+            <select name="customer_id" class="form-control" style="max-width: 200px;">
+                <option value="">All Customers</option>
+                {% for c in customers %}
+                <option value="{{ c.id }}" {% if filters.customer_id|string == c.id|string %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+
+            <input type="date" name="date_from" class="form-control" value="{{ filters.date_from }}" title="Date From" style="max-width: 160px;">
+            <input type="date" name="date_to" class="form-control" value="{{ filters.date_to }}" title="Date To" style="max-width: 160px;">
+
+            <button type="submit" class="btn btn-primary" style="width: auto;">Filter</button>
+            <a href="/customers/sales" class="btn btn-secondary" style="width: auto;">Reset</a>
+        </form>
+
+        <a href="/customers/sales/new" class="btn btn-teal" style="width: auto;">
+            <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i>
+            New POS Sale
+        </a>
+    </div>
+</div>
+
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Invoice #</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Payment Method</th>
+                <th>Total Invoiced</th>
+                <th>Amount Received</th>
+                <th>Balance Due</th>
+                <th style="text-align: right;">Print & Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in sales %}
+            <tr>
+                <td style="font-weight: 700;">
+                    <a href="/customers/sales/{{ s.id }}" class="link">{{ s.invoice_no }}</a>
+                </td>
+                <td style="color: var(--text-secondary); font-size: 0.85rem;">{{ s.date }}</td>
+                <td>
+                    <span style="font-weight: 600; color: var(--primary);">{{ s.customer.name }}</span>
+                    {% if s.customer.is_walk_in %}
+                    <span class="badge badge-teal" style="font-size: 0.68rem; margin-left: 4px;">Walk-in</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="badge {% if s.payment_method == 'Cash' %}badge-success{% elif s.payment_method == 'Bank Transfer' %}badge-teal{% else %}badge-navy{% endif %}">
+                        {{ s.payment_method or 'Cash' }}
+                    </span>
+                </td>
+                <td style="font-weight: 700; font-family: var(--font-heading); color: var(--primary);">
+                    Rs. {{ '%.2f'|format(s.total_amount|float) }}
+                </td>
+                <td style="font-weight: 600; font-family: var(--font-heading); color: var(--success);">
+                    Rs. {{ '%.2f'|format(s.amount_received|float) }}
+                </td>
+                <td style="font-weight: 700; font-family: var(--font-heading);">
+                    {% if s.balance > 0 %}
+                    <span style="color: var(--error);">Rs. {{ '%.2f'|format(s.balance|float) }}</span>
+                    {% else %}
+                    <span style="color: var(--success); font-size: 0.85rem;">Paid (Rs. 0.00)</span>
+                    {% endif %}
+                </td>
+                <td style="text-align: right;">
+                    <div style="display: inline-flex; gap: 6px;">
+                        <a href="/customers/sales/{{ s.id }}" class="btn btn-secondary btn-sm" title="View Invoice">
+                            <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
+                        </a>
+                        <a href="/print/sale-pos/{{ s.id }}" class="btn btn-secondary btn-sm" title="Thermal POS Receipt" target="_blank" onclick="window.open(this.href, 'pos', 'width=420,height=620'); return false;">
+                            <i data-lucide="receipt" style="width: 14px; height: 14px;"></i>
+                        </a>
+                        <a href="/print/sale/{{ s.id }}" class="btn btn-secondary btn-sm" title="Print A4 Invoice" target="_blank">
+                            <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 48px 0; color: var(--text-muted);">
+                    <i data-lucide="receipt" style="width: 36px; height: 36px; margin-bottom: 8px; opacity: 0.4;"></i>
+                    <p style="font-size: 0.95rem;">No sales invoices match your filters.</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

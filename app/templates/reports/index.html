@@ -1,0 +1,97 @@
+{% extends "dashboard.html" %}
+{% block title %}Financial & Operational Reports — Arshaf Sanitary Store{% endblock %}
+{% block page_title %}Financial Analytics & Business Reports{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 24px;">
+    <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0;">
+        Access comprehensive accounting reports, inventory valuations, profit margins, and counter transaction summaries.
+    </p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+    <!-- Sales Report -->
+    <a href="/reports/sales?date_from={{ month_start }}&date_to={{ today }}" class="report-card">
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 12px;">
+            <div style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--secondary-light); color: var(--secondary); display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="receipt" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div>
+                <h3>Sales Revenue Report</h3>
+                <span class="badge badge-teal">Daily & Monthly</span>
+            </div>
+        </div>
+        <p>Detailed sales breakdown by date range, customer invoices, payment methods, and revenue totals.</p>
+    </a>
+
+    <!-- Purchase Report -->
+    <a href="/reports/purchases?date_from={{ month_start }}&date_to={{ today }}" class="report-card">
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 12px;">
+            <div style="width: 44px; height: 44px; border-radius: var(--radius-md); background: #E0E7FF; color: #4338CA; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="shopping-bag" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div>
+                <h3>Purchases & Inbound Costs</h3>
+                <span class="badge badge-navy">Vendor Analysis</span>
+            </div>
+        </div>
+        <p>Supplier bills, inventory acquisitions, inbound stock payments, and outstanding vendor liabilities.</p>
+    </a>
+
+    <!-- Profit Report -->
+    <a href="/reports/profit?date_from={{ month_start }}&date_to={{ today }}" class="report-card">
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 12px;">
+            <div style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--success-bg); color: var(--success); display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="trending-up" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div>
+                <h3>Profitability Analysis</h3>
+                <span class="badge badge-success">Admin Access</span>
+            </div>
+        </div>
+        <p>Item-level gross profit margin calculated from sale price minus actual acquisition cost.</p>
+    </a>
+
+    <!-- Stock Valuation -->
+    <a href="/reports/stock-valuation" class="report-card">
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 12px;">
+            <div style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--accent-light); color: var(--accent); display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="database" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div>
+                <h3>Stock Valuation Audit</h3>
+                <span class="badge badge-gold">Asset Value</span>
+            </div>
+        </div>
+        <p>Live inventory asset valuation (quantity × purchase cost) across all active sanitary ware categories.</p>
+    </a>
+
+    <!-- Outstanding Balances -->
+    <a href="/reports/outstanding" class="report-card">
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 12px;">
+            <div style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--warning-bg); color: var(--warning); display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="scale" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div>
+                <h3>Outstanding Balances</h3>
+                <span class="badge badge-warning">Credit & Debit</span>
+            </div>
+        </div>
+        <p>Complete reconciliation of who owes your store (receivables) and what you owe suppliers (payables).</p>
+    </a>
+
+    <!-- Returns Report -->
+    <a href="/reports/returns?date_from={{ month_start }}&date_to={{ today }}" class="report-card">
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 12px;">
+            <div style="width: 44px; height: 44px; border-radius: var(--radius-md); background: #FCE7F3; color: #BE185D; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="rotate-ccw" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div>
+                <h3>Returns & Replacements</h3>
+                <span class="badge" style="background:#FCE7F3; color:#BE185D;">Quality Control</span>
+            </div>
+        </div>
+        <p>Analysis of customer and supplier returns categorized by defective parts, size mismatch, or transit damage.</p>
+    </a>
+</div>
+{% endblock %}
