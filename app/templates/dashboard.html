@@ -13,6 +13,10 @@
                 <span class="brand-title">ARSHAF SANITARY</span>
                 <span class="brand-tagline">Store & Bathware</span>
             </div>
+            <!-- Mobile Close Button -->
+            <button type="button" class="sidebar-close-btn" onclick="closeSidebar()" title="Close Navigation Menu">
+                <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+            </button>
         </div>
 
         <nav class="sidebar-nav">
@@ -111,8 +115,13 @@
     <main class="main-content">
         <header class="top-nav">
             <div class="top-nav-left">
-                <button class="mobile-menu-toggle" onclick="document.body.classList.toggle('sidebar-open')" title="Toggle Menu">
-                    <i data-lucide="menu" style="width: 20px; height: 20px;"></i>
+                <!-- Mobile / Tablet Hamburger Button -->
+                <button type="button" class="mobile-menu-toggle" id="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Toggle Navigation Menu">
+                    <i data-lucide="menu" style="width: 22px; height: 22px;"></i>
+                </button>
+                <!-- Desktop Sidebar Collapse Toggle -->
+                <button type="button" class="desktop-sidebar-toggle" id="desktop-sidebar-toggle" onclick="toggleDesktopSidebar()" title="Toggle Sidebar">
+                    <i data-lucide="panel-left-close" id="sidebar-collapse-icon" style="width: 20px; height: 20px;"></i>
                 </button>
                 <div>
                     <h1 class="page-title">{% block page_title %}Dashboard Overview{% endblock %}</h1>
@@ -125,7 +134,7 @@
                     <span id="current-live-date"></span>
                 </div>
 
-                <a href="/customers/sales/new" class="btn btn-teal btn-sm" style="font-weight: 600;">
+                <a href="/customers/sales/new" class="btn btn-teal btn-sm" style="font-weight: 600;" title="Open Point of Sale">
                     <i data-lucide="plus-circle" style="width: 15px; height: 15px;"></i>
                     <span style="display: inline-block;">POS Sale</span>
                 </a>
@@ -159,6 +168,50 @@
 </div>
 
 <script>
+    // Sidebar Controls
+    function toggleMobileSidebar() {
+        document.body.classList.toggle('sidebar-open');
+    }
+    function closeSidebar() {
+        document.body.classList.remove('sidebar-open');
+    }
+    function toggleDesktopSidebar() {
+        document.body.classList.toggle('sidebar-collapsed');
+        const isCollapsed = document.body.classList.contains('sidebar-collapsed');
+        try {
+            localStorage.setItem('arshaf_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+        } catch (e) {}
+        const icon = document.getElementById('sidebar-collapse-icon');
+        if (icon) {
+            icon.setAttribute('data-lucide', isCollapsed ? 'panel-left-open' : 'panel-left-close');
+            lucide.createIcons();
+        }
+    }
+
+    // Auto-close mobile sidebar when clicking any menu item
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            if (window.innerWidth >= 1024 && localStorage.getItem('arshaf_sidebar_collapsed') === 'true') {
+                document.body.classList.add('sidebar-collapsed');
+                const icon = document.getElementById('sidebar-collapse-icon');
+                if (icon) {
+                    icon.setAttribute('data-lucide', 'panel-left-open');
+                }
+            }
+        } catch (e) {}
+
+        const navLinks = document.querySelectorAll('.sidebar-nav .nav-item');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth < 1024) {
+                    closeSidebar();
+                }
+            });
+        });
+
+        lucide.createIcons();
+    });
+
     // Live date display in topnav
     (function() {
         const d = new Date();

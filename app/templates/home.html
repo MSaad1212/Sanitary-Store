@@ -4,7 +4,7 @@
 
 {% block content %}
 <!-- Quick Actions Toolbar -->
-<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; padding: 14px 20px; background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: var(--shadow-xs);">
+<div class="quick-actions-bar">
     <div style="display: flex; align-items: center; gap: 8px;">
         <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Quick Actions:</span>
     </div>
@@ -165,7 +165,7 @@
 </div>
 
 <!-- Charts Section -->
-<div style="display: grid; grid-template-columns: 1.7fr 1.1fr; gap: 24px; margin-bottom: 28px;">
+<div class="dashboard-2col dashboard-charts-grid">
     <!-- Sales Trend Chart -->
     <div class="card" style="padding: 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -175,7 +175,7 @@
             </div>
             <span class="badge badge-teal"><i data-lucide="trending-up" style="width: 12px; height: 12px;"></i> Live Updates</span>
         </div>
-        <div style="position: relative; height: 240px; width: 100%;">
+        <div class="chart-container-responsive">
             <canvas id="salesTrendChart"></canvas>
         </div>
     </div>
@@ -189,14 +189,14 @@
             </div>
             <a href="/stock" class="link" style="font-size: 0.8rem;">Categories</a>
         </div>
-        <div style="position: relative; height: 240px; width: 100%; display: flex; align-items: center; justify-content: center;">
+        <div class="chart-container-responsive" style="display: flex; align-items: center; justify-content: center;">
             <canvas id="categoryChart"></canvas>
         </div>
     </div>
 </div>
 
 <!-- Two-Column Section: Recent Transactions & Low Stock Alerts -->
-<div style="display: grid; grid-template-columns: 1.7fr 1.1fr; gap: 24px;">
+<div class="dashboard-2col dashboard-tables-grid">
     <!-- Recent Transactions -->
     <div class="card" style="padding: 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">

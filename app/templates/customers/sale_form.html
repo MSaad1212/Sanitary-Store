@@ -22,6 +22,12 @@
             box-sizing: border-box !important;
         }
     }
+    @media (max-width: 992px) {
+        .content-body {
+            padding: 12px 12px 84px 12px !important;
+            overflow-y: auto !important;
+        }
+    }
 </style>
 
 <form method="POST" action="/customers/sales/new" id="pos-sale-form" style="height: 100%; display: flex; flex-direction: column;">
@@ -143,9 +149,15 @@
                         </h3>
                         <span id="cart-item-count-text" style="font-size: 0.74rem; color: var(--text-secondary);">0 items selected</span>
                     </div>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="clearCart()" title="Empty Cart" style="padding: 2px 8px; font-size: 0.74rem; height: 26px;">
-                        <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i> Clear
-                    </button>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="clearCart()" title="Empty Cart" style="padding: 2px 8px; font-size: 0.74rem; height: 26px;">
+                            <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i> Clear
+                        </button>
+                        <!-- Mobile Close / Back to Products Button -->
+                        <button type="button" class="pos-mobile-close-btn" onclick="toggleMobileCart(false)" title="Back to Products">
+                            <i data-lucide="x" style="width: 14px; height: 14px;"></i> Products
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Customer & Date Config (Compact) -->
@@ -255,6 +267,27 @@
             </div>
         </div>
     </div>
+
+    <!-- Mobile Bottom Floating Sticky Cart Bar -->
+    <div class="pos-mobile-cart-bar" id="pos-mobile-cart-bar" onclick="toggleMobileCart(true)">
+        <div class="pos-mobile-cart-info">
+            <div class="pos-mobile-cart-icon-wrap">
+                <i data-lucide="shopping-cart" style="width: 20px; height: 20px;"></i>
+                <span class="pos-mobile-cart-badge" id="pos-mobile-badge">0</span>
+            </div>
+            <div>
+                <div class="pos-mobile-cart-label">Current Cart (<strong id="pos-mobile-count">0</strong> items)</div>
+                <div class="pos-mobile-cart-total" id="pos-mobile-total">Rs. 0.00</div>
+            </div>
+        </div>
+        <button type="button" class="pos-mobile-checkout-btn">
+            <span>Checkout</span>
+            <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
+        </button>
+    </div>
+
+    <!-- Mobile Cart Drawer Backdrop -->
+    <div class="pos-cart-backdrop" id="pos-cart-backdrop" onclick="toggleMobileCart(false)"></div>
 </form>
 
 <script>
@@ -352,6 +385,13 @@
         }
 
         renderCart();
+
+        // Mobile cart bar subtle pulse feedback
+        const mobBar = document.getElementById('pos-mobile-cart-bar');
+        if (mobBar && window.innerWidth <= 992) {
+            mobBar.style.transform = 'scale(1.03)';
+            setTimeout(() => { mobBar.style.transform = 'scale(1)'; }, 150);
+        }
     }
 
     function updateItemQty(id, newQty) {
@@ -397,6 +437,15 @@
         renderCart();
     }
 
+    function toggleMobileCart(open) {
+        if (open) {
+            document.body.classList.add('pos-cart-open');
+        } else {
+            document.body.classList.remove('pos-cart-open');
+        }
+        lucide.createIcons();
+    }
+
     function renderCart() {
         const container = document.getElementById('cart-rows-container');
         const emptyMsg = document.getElementById('empty-cart-msg');
@@ -411,6 +460,12 @@
             countText.textContent = '0 items selected';
             summaryCount.textContent = '0 items';
             submitBtn.disabled = true;
+            const mobBadge = document.getElementById('pos-mobile-badge');
+            const mobCount = document.getElementById('pos-mobile-count');
+            const mobTotal = document.getElementById('pos-mobile-total');
+            if (mobBadge) mobBadge.textContent = '0';
+            if (mobCount) mobCount.textContent = '0';
+            if (mobTotal) mobTotal.textContent = 'Rs. 0.00';
             calculateTotals();
             return;
         }
@@ -462,6 +517,11 @@
         summaryCount.textContent = `${totalItems} total item(s)`;
         submitBtn.disabled = false;
 
+        const mobBadge = document.getElementById('pos-mobile-badge');
+        const mobCount = document.getElementById('pos-mobile-count');
+        if (mobBadge) mobBadge.textContent = totalItems;
+        if (mobCount) mobCount.textContent = totalItems;
+
         lucide.createIcons();
         calculateTotals();
     }
@@ -478,6 +538,9 @@
 
         document.getElementById('pos-display-subtotal').textContent = `Rs. ${total.toFixed(2)}`;
         document.getElementById('pos-display-grand-total').textContent = `Rs. ${total.toFixed(2)}`;
+
+        const mobTotal = document.getElementById('pos-mobile-total');
+        if (mobTotal) mobTotal.textContent = `Rs. ${total.toFixed(2)}`;
 
         const balEl = document.getElementById('pos-display-balance');
         if (balance > 0) {
