@@ -17,7 +17,7 @@ router = APIRouter(prefix="/print", tags=["print"])
 templates = Jinja2Templates(directory="app/templates")
 
 SHOP_NAME = "Arshaf Sanitary Store"
-SHOP_TAGLINE = "Plumbing, Bathware & Luxury Sanitary Fittings | WhatsApp: 0331-9542475"
+SHOP_TAGLINE = "Plumbing, Bathware & Luxury Sanitary Fittings | WhatsApp: 0321-4143512"
 
 _weasy_html = None
 _weasy_tried = False
