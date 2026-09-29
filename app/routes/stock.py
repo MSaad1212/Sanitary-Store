@@ -92,14 +92,14 @@ def create_item(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    code = next_code(db, Item, "item_code", "TYR")
+    code = next_code(db, Item, "item_code", "ITM")
 
     item = Item(
         item_code=code,
         brand=brand.strip(),
-        size=size.strip() or None,
-        pattern=pattern.strip() or None,
-        type=type or None,
+        name=name.strip(),
+        barcode=barcode.strip() or None,
+        description=description.strip() or None,
         category=category,
         purchase_price=money(purchase_price),
         sale_price=money(sale_price),
@@ -110,7 +110,7 @@ def create_item(
     )
     db.add(item)
     db.commit()
-    log_audit(db, current_user.id, "Create Item", f"Created item {code} — {brand}")
+    log_audit(db, current_user.id, "Create Item", f"Created item {code} — {brand} {name.strip()}")
     return RedirectResponse(url="/stock", status_code=303)
 
 
@@ -161,9 +161,9 @@ def update_item(
     if not item:
         raise HTTPException(404, "Item not found")
     item.brand = brand.strip()
-    item.barcode = size.strip() or None
-    item.name = pattern.strip() or None
-    item.description = type or None
+    item.name = name.strip()
+    item.barcode = barcode.strip() or None
+    item.description = description.strip() or None
     item.category = category
     item.purchase_price = money(purchase_price)
     item.sale_price = money(sale_price)
@@ -231,6 +231,13 @@ def delete_item(
         raise HTTPException(404, "Item not found")
     
     item_code = item.item_code
+    has_history = db.query(StockMovement).filter(StockMovement.item_id == item_id).first() is not None
+    if has_history:
+        item.status = "Discontinued"
+        db.commit()
+        log_audit(db, current_user.id, "Deactivate Item", f"Discontinued item {item_code} (has transaction history)")
+        return RedirectResponse(url="/stock", status_code=303)
+
     db.delete(item)
     db.commit()
     log_audit(db, current_user.id, "Delete Item", f"Deleted item {item_code}")

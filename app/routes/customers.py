@@ -324,6 +324,15 @@ def delete_customer(
         raise HTTPException(400, "Cannot delete Walk-in Customer")
     
     customer_code = customer.customer_code
+    has_history = db.query(Sale).filter(Sale.customer_id == customer_id).first() is not None or \
+                  db.query(CustomerLedger).filter(CustomerLedger.customer_id == customer_id).first() is not None or \
+                  db.query(PaymentReceived).filter(PaymentReceived.customer_id == customer_id).first() is not None
+    if has_history:
+        customer.status = "Deactivated"
+        db.commit()
+        log_audit(db, current_user.id, "Deactivate Customer", f"Deactivated customer {customer_code} (has transaction history)")
+        return RedirectResponse(url="/customers", status_code=303)
+
     db.delete(customer)
     db.commit()
     log_audit(db, current_user.id, "Delete Customer", f"Deleted customer {customer_code}")

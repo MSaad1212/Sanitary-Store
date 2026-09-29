@@ -297,6 +297,15 @@ def delete_supplier(
         raise HTTPException(404, "Supplier not found")
     
     supplier_code = supplier.supplier_code
+    has_history = db.query(Purchase).filter(Purchase.supplier_id == supplier_id).first() is not None or \
+                  db.query(SupplierLedger).filter(SupplierLedger.supplier_id == supplier_id).first() is not None or \
+                  db.query(PaymentMade).filter(PaymentMade.supplier_id == supplier_id).first() is not None
+    if has_history:
+        supplier.status = "Deactivated"
+        db.commit()
+        log_audit(db, current_user.id, "Deactivate Supplier", f"Deactivated supplier {supplier_code} (has transaction history)")
+        return RedirectResponse(url="/suppliers", status_code=303)
+
     db.delete(supplier)
     db.commit()
     log_audit(db, current_user.id, "Delete Supplier", f"Deleted supplier {supplier_code}")

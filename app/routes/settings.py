@@ -10,6 +10,7 @@ from app.auth import get_current_user
 router = APIRouter(prefix="/settings", tags=["settings"])
 templates = Jinja2Templates(directory="app/templates")
 
+@router.get("", response_class=HTMLResponse)
 @router.get("/", response_class=HTMLResponse)
 def settings_page(request: Request, current_user: User = Depends(get_current_user), db: Session = Depends(get_db), error: str = None):
     categories = db.query(ItemCategory).order_by(ItemCategory.name).all()
